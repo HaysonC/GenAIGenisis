@@ -1245,3 +1245,512 @@ body {
   border-top: 4px solid #000000;
 }
 
+/* Add these new styles for text input mode */
+.input-mode-selector {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.mode-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: var(--lego-gray);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.75rem 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: "Fredoka One", cursive;
+  box-shadow: 0 4px 0 var(--lego-black);
+}
+
+.mode-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 var(--lego-black);
+}
+
+.mode-button.active {
+  background-color: var(--lego-red);
+  box-shadow: 0 4px 0 var(--lego-dark-red);
+}
+
+.mode-button.active:hover {
+  box-shadow: 0 6px 0 var(--lego-dark-red);
+}
+
+.text-input-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+.text-input-card {
+  background-color: var(--lego-yellow);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  padding: 2rem;
+  text-align: center;
+  width: 100%;
+  max-width: 600px;
+  position: relative;
+  border: 8px solid var(--lego-red);
+  overflow: hidden;
+}
+
+.text-input-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 20px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--lego-yellow),
+    var(--lego-yellow) 20px,
+    var(--lego-dark-yellow) 20px,
+    var(--lego-dark-yellow) 40px
+  );
+}
+
+.text-input-icon {
+  font-size: 3rem;
+  color: var(--lego-red);
+  margin-bottom: 1rem;
+  filter: drop-shadow(3px 3px 0 var(--lego-dark-red));
+}
+
+.text-prompt-input {
+  width: 100%;
+  padding: 1rem;
+  margin: 1.5rem 0;
+  border: 3px solid var(--lego-red);
+  border-radius: var(--radius);
+  font-size: 1.1rem;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 100px;
+  background-color: white;
+}
+
+.text-prompt-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(208, 16, 18, 0.3);
+}
+
+.text-generate-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: var(--lego-red);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.75rem 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+  font-family: "Fredoka One", cursive;
+  box-shadow: 0 4px 0 var(--lego-dark-red);
+  margin-top: 1rem;
+}
+
+.text-generate-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 var(--lego-dark-red);
+}
+
+.text-generate-button:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 var(--lego-dark-red);
+}
+
+.text-generate-button:disabled {
+  background-color: var(--lego-gray);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.text-section {
+  background-color: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  padding: 1.5rem;
+  overflow: hidden;
+  border: 6px solid var(--lego-red);
+  position: relative;
+}
+
+.text-section::after {
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  height: 8px;
+  border-radius: 4px;
+  background-color: var(--lego-yellow);
+}
+
+.text-section h2 {
+  font-family: "Fredoka One", cursive;
+  margin-bottom: 1.5rem;
+  margin-top: 0.5rem;
+  font-size: 1.8rem;
+  color: var(--lego-red);
+  text-shadow: 1px 1px 0 var(--lego-yellow);
+}
+
+.text-preview {
+  white-space: pre-wrap;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  padding: 1rem;
+  background-color: var(--lego-light-gray);
+  border-radius: var(--radius);
+  border: 3px solid var(--lego-yellow);
+}
+
+/* Add these new styles for LDR file mode and views */
+.ldr-file-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background-color: var(--lego-light-gray);
+  border-radius: var(--radius);
+  border: 3px solid var(--lego-yellow);
+}
+
+.ldr-views-container {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.ldr-views-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.ldr-view-item {
+  border: 3px solid var(--lego-yellow);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background-color: white;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.ldr-view-item:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+}
+
+.ldr-view-image {
+  width: 100%;
+  height: 200px;
+  object-fit: contain;
+  background-color: white;
+  display: block;
+}
+
+.ldr-view-caption {
+  padding: 0.5rem;
+  text-align: center;
+  font-weight: bold;
+  background-color: var(--lego-light-gray);
+  color: var(--lego-black);
+  text-transform: capitalize;
+}
+
+.ldr-model-section {
+  grid-column: 1 / -1;
+}
+
+/* Adjust the mode buttons to accommodate three options */
+.input-mode-selector {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .input-mode-selector {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .mode-button {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .ldr-views-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+}
+
+/* Add these styles for LDR conversion */
+.ldr-convert-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: var(--lego-blue);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.75rem 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+  font-family: "Fredoka One", cursive;
+  box-shadow: 0 4px 0 var(--lego-dark-red);
+  margin-top: 1rem;
+}
+
+.ldr-convert-button:hover:not(:disabled) {
+  background-color: var(--lego-green);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 var(--lego-dark-red);
+}
+
+.ldr-convert-button:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 var(--lego-dark-red);
+}
+
+.ldr-convert-button:disabled {
+  background-color: var(--lego-gray);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.ldr-download-section {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: var(--lego-light-gray);
+  border-radius: var(--radius);
+  border: 3px solid var(--lego-yellow);
+}
+
+.ldr-download-section h3 {
+  font-family: "Fredoka One", cursive;
+  color: var(--lego-green);
+  margin-bottom: 0.5rem;
+}
+
+.ldr-download-button,
+.ldr-view-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: var(--lego-green);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+  margin-top: 0.75rem;
+  box-shadow: 0 3px 0 var(--lego-dark-red);
+}
+
+.ldr-view-button {
+  background-color: var(--lego-blue);
+}
+
+.ldr-download-button:hover,
+.ldr-view-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 0 var(--lego-dark-red);
+}
+
+.ldr-download-button:active,
+.ldr-view-button:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--lego-dark-red);
+}
+
+.model-actions {
+  margin-top: 1rem;
+}
+
+/* Debug Panel Styles */
+.debug-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: var(--lego-black);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  transition: all 0.3s ease;
+}
+
+.debug-toggle:hover {
+  background-color: var(--lego-red);
+  transform: scale(1.1);
+}
+
+.debug-panel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 50vh;
+  background-color: white;
+  border-top: 6px solid var(--lego-blue);
+  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.2);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.debug-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background-color: var(--lego-blue);
+  color: white;
+}
+
+.debug-header h2 {
+  font-family: "Fredoka One", cursive;
+  font-size: 1.2rem;
+  margin: 0;
+  color: white;
+  text-shadow: none;
+}
+
+.debug-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.debug-clear-button,
+.debug-close-button {
+  background-color: var(--lego-black);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.debug-clear-button:hover,
+.debug-close-button:hover {
+  background-color: var(--lego-red);
+}
+
+.debug-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  background-color: #f5f5f5;
+  font-family: monospace;
+  font-size: 0.9rem;
+}
+
+.debug-empty {
+  color: #666;
+  font-style: italic;
+  text-align: center;
+  padding: 2rem;
+}
+
+.debug-log-entry {
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #ddd;
+}
+
+.debug-log-timestamp {
+  color: var(--lego-blue);
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+}
+
+.debug-log-message {
+  color: var(--lego-black);
+  margin-bottom: 0.5rem;
+}
+
+.debug-log-data {
+  background-color: white;
+  padding: 0.75rem;
+  border-radius: var(--radius);
+  border: 1px solid #ddd;
+  overflow-x: auto;
+  max-height: 200px;
+  overflow-y: auto;
+  margin: 0;
+  color: #333;
+}
+
+/* Adjust the bottom progress container to not overlap with debug panel */
+.bottom-progress-container {
+  z-index: 99;
+}
+
+/* High contrast mode adjustments for debug panel */
+.high-contrast .debug-panel {
+  border-top: 6px solid #0000ff;
+}
+
+.high-contrast .debug-header {
+  background-color: #0000ff;
+}
+
+.high-contrast .debug-log-timestamp {
+  color: #0000ff;
+}
+
+.high-contrast .debug-log-data {
+  border: 1px solid #000000;
+}
+

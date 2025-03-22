@@ -6,9 +6,11 @@ const path = require("path")
 const cors = require("cors")
 const GeminiImageToText = require("./GeminiImageToText")
 const ShapeGenerator = require("./ShapeGenerator")
-const LDRSampler = require("./sampleFromLDR") // Fixed import path
+const LDRSampler = require("./sampleFromLDR")
+// Add this to the top of server.js with the other imports
+const ModelToLDR = require("./ModelToLDR")
 const app = express()
-const { spawn } = require("child_process") // Add this for the checkCommandExists method
+const { spawn } = require("child_process")
 
 app.use(express.json())
 app.use(cors())
@@ -37,6 +39,12 @@ if (!fs.existsSync(instructionsDir)) {
   fs.mkdirSync(instructionsDir)
 }
 
+// Create ldr_output directory if it doesn't exist
+const ldrOutputDir = path.join(__dirname, "ldr_output")
+if (!fs.existsSync(ldrOutputDir)) {
+  fs.mkdirSync(ldrOutputDir)
+}
+
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -53,6 +61,8 @@ const upload = multer({ storage: storage })
 const geminiModel = new GeminiImageToText()
 const shapeGenerator = new ShapeGenerator()
 const ldrSampler = new LDRSampler()
+// Add this after initializing the other models
+const modelToLdr = new ModelToLDR()
 
 // Serve static files from the models directory
 app.use("/models", express.static(modelsDir))
@@ -66,6 +76,10 @@ app.use(
       res.type("image/jpeg")
     } else if (req.path.endsWith(".png")) {
       res.type("image/png")
+    } else if (req.path.endsWith(".stl")) {
+      res.type("application/octet-stream")
+    } else if (req.path.endsWith(".glb")) {
+      res.type("model/gltf-binary")
     }
     next()
   },
@@ -74,6 +88,9 @@ app.use(
 
 // Serve static files from the instructions directory
 app.use("/instructions", express.static(instructionsDir))
+
+// Serve static files from the ldr_output directory
+app.use("/ldr_output", express.static(ldrOutputDir))
 
 // Image upload endpoint
 app.post("/upload-image", upload.single("image"), (req, res) => {
@@ -106,11 +123,20 @@ app.post("/generate-model", async (req, res) => {
       return res.status(400).json({ message: "No prompt provided" })
     }
 
+    console.log(`Received request to generate 3D model with prompt: "${prompt}"`)
+    console.log("Options:", options)
+
+    // Generate the 3D model using ShapeGenerator
     const result = await shapeGenerator.generateModel(prompt, options)
+
+    console.log(`3D model generated successfully: ${result.filename}`)
+    console.log(`File path: ${result.filePath}`)
+    console.log(`File size: ${(result.fileSize / 1024).toFixed(1)} KB`)
+
     res.json(result)
   } catch (error) {
     console.error("Error generating 3D model:", error)
-    res.status(500).json({ message: "Error generating 3D model" })
+    res.status(500).json({ message: `Error generating 3D model: ${error.message}` })
   }
 })
 
@@ -119,15 +145,27 @@ app.post("/improve-model", async (req, res) => {
   try {
     const { modelId, instructions } = req.body
 
+    if (!modelId) {
+      return res.status(400).json({ message: "No model ID provided" })
+    }
+
     if (!instructions) {
       return res.status(400).json({ message: "No instructions provided" })
     }
 
+    console.log(`Received request to improve model ${modelId} with instructions: "${instructions}"`)
+
+    // Improve the 3D model using ShapeGenerator
     const result = await shapeGenerator.improveModel(modelId, instructions)
+
+    console.log(`3D model improved successfully: ${result.filename}`)
+    console.log(`File path: ${result.filePath}`)
+    console.log(`File size: ${(result.fileSize / 1024).toFixed(1)} KB`)
+
     res.json(result)
   } catch (error) {
     console.error("Error improving 3D model:", error)
-    res.status(500).json({ message: "Error improving 3D model" })
+    res.status(500).json({ message: `Error improving 3D model: ${error.message}` })
   }
 })
 
@@ -283,6 +321,188 @@ app.post("/process-ldr", upload.single("ldrFile"), async (req, res) => {
 // Add this route to serve the test HTML page
 app.get("/test-ldr", (req, res) => {
   res.sendFile(path.join(__dirname, "testLDR.html"))
+})
+
+// Add these new endpoints to server.js
+
+// Convert 3D model to LDR format
+app.post("/convert-to-ldr", async (req, res) => {
+  try {
+    const { modelPath } = req.body
+
+    if (!modelPath) {
+      return res.status(400).json({ message: "No model path provided" })
+    }
+
+    // Check if the model file exists
+    const fullModelPath = path.join(__dirname, modelPath.replace(/^\//, ""))
+    if (!fs.existsSync(fullModelPath)) {
+      return res.status(404).json({ message: `Model file not found: ${modelPath}` })
+    }
+
+    console.log(`Converting model to LDR: ${fullModelPath}`)
+
+    // Convert the model to LDR
+    const result = await modelToLdr.convertToLDR(fullModelPath)
+
+    console.log(`Model converted to LDR: ${result.ldrFilePath}`)
+    console.log(`LDR file size: ${(result.fileSize / 1024).toFixed(1)} KB`)
+
+    res.json(result)
+  } catch (error) {
+    console.error("Error converting model to LDR:", error)
+    res.status(500).json({ message: `Error converting model to LDR: ${error.message}` })
+  }
+})
+
+// Optimize LDR file
+app.post("/optimize-ldr", async (req, res) => {
+  try {
+    const { ldrPath } = req.body
+
+    if (!ldrPath) {
+      return res.status(400).json({ message: "No LDR path provided" })
+    }
+
+    // Check if the LDR file exists
+    const fullLdrPath = path.join(__dirname, ldrPath.replace(/^\//, ""))
+    if (!fs.existsSync(fullLdrPath)) {
+      return res.status(404).json({ message: `LDR file not found: ${ldrPath}` })
+    }
+
+    console.log(`Optimizing LDR file: ${fullLdrPath}`)
+
+    // Optimize the LDR file
+    const result = await modelToLdr.optimizeLDR(fullLdrPath)
+
+    console.log(`LDR file optimized: ${result.ldrFilePath}`)
+    console.log(`Optimized LDR file size: ${(result.fileSize / 1024).toFixed(1)} KB`)
+
+    res.json(result)
+  } catch (error) {
+    console.error("Error optimizing LDR file:", error)
+    res.status(500).json({ message: `Error optimizing LDR file: ${error.message}` })
+  }
+})
+
+// Generate 3D model and convert to LDR in one step
+app.post("/generate-ldr-from-text", async (req, res) => {
+  try {
+    const { prompt, options } = req.body
+
+    if (!prompt) {
+      return res.status(400).json({ message: "No prompt provided" })
+    }
+
+    console.log(`Received request to generate LDR from text: "${prompt}"`)
+
+    // Step 1: Generate the 3D model
+    const modelResult = await shapeGenerator.generateModel(prompt, options)
+    console.log(`3D model generated: ${modelResult.filePath}`)
+
+    // Step 2: Convert the 3D model to LDR
+    const ldrResult = await modelToLdr.convertToLDR(modelResult.filePath)
+    console.log(`Model converted to LDR: ${ldrResult.ldrFilePath}`)
+
+    // Return both the 3D model and LDR information
+    res.json({
+      model: modelResult,
+      ldr: ldrResult,
+    })
+  } catch (error) {
+    console.error("Error generating LDR from text:", error)
+    res.status(500).json({ message: `Error generating LDR from text: ${error.message}` })
+  }
+})
+
+// Generate 3D model from image and convert to LDR in one step
+app.post("/generate-ldr-from-image", async (req, res) => {
+  try {
+    // Step 1: Get the description from Gemini
+    let description
+    try {
+      description = await geminiModel.predict()
+      console.log(`Generated description from image: "${description}"`)
+    } catch (error) {
+      console.error("Error generating description from image:", error)
+      return res.status(500).json({ message: `Error generating description: ${error.message}` })
+    }
+
+    // Step 2: Generate 3D model from the description
+    const options = req.body.options || {}
+    console.log(`Generating 3D model from description: "${description}"`)
+    const modelResult = await shapeGenerator.generateModel(description, options)
+    console.log(`3D model generated: ${modelResult.filePath}`)
+
+    // Step 3: Convert the 3D model to LDR
+    const ldrResult = await modelToLdr.convertToLDR(modelResult.filePath)
+    console.log(`Model converted to LDR: ${ldrResult.ldrFilePath}`)
+
+    // Return all information
+    res.json({
+      description,
+      model: modelResult,
+      ldr: ldrResult,
+    })
+  } catch (error) {
+    console.error("Error generating LDR from image:", error)
+    res.status(500).json({ message: `Error generating LDR from image: ${error.message}` })
+  }
+})
+
+// Generate 3D model from text endpoint
+app.post("/generate-model-from-text", async (req, res) => {
+  try {
+    const { prompt, options } = req.body
+
+    if (!prompt) {
+      return res.status(400).json({ message: "No prompt provided" })
+    }
+
+    console.log(`Received request to generate 3D model from text: "${prompt}"`)
+
+    // Generate the 3D model using ShapeGenerator
+    const result = await shapeGenerator.generateModel(prompt, options)
+
+    console.log(`3D model generated successfully: ${result.filename}`)
+
+    res.json(result)
+  } catch (error) {
+    console.error("Error generating 3D model from text:", error)
+    res.status(500).json({ message: `Error generating 3D model: ${error.message}` })
+  }
+})
+
+// Generate 3D model from image endpoint
+app.post("/generate-model-from-image", async (req, res) => {
+  try {
+    // First, get the description from Gemini
+    let description
+    try {
+      description = await geminiModel.predict()
+      console.log(`Generated description from image: "${description}"`)
+    } catch (error) {
+      console.error("Error generating description from image:", error)
+      return res.status(500).json({ message: `Error generating description: ${error.message}` })
+    }
+
+    // Then, use the description to generate a 3D model
+    const options = req.body.options || {}
+
+    console.log(`Generating 3D model from description: "${description}"`)
+    const result = await shapeGenerator.generateModel(description, options)
+
+    console.log(`3D model generated successfully: ${result.filename}`)
+
+    // Return both the description and the model information
+    res.json({
+      description,
+      ...result,
+    })
+  } catch (error) {
+    console.error("Error in generate-model-from-image flow:", error)
+    res.status(500).json({ message: `Error generating 3D model from image: ${error.message}` })
+  }
 })
 
 // Serve static React app in production

@@ -1,9 +1,9 @@
 "use client"
 
 import { useRef } from "react"
-import { FaTimes, FaCubes, FaInfoCircle } from "react-icons/fa"
+import { FaTimes, FaCubes, FaInfoCircle, FaDiceD6 } from "react-icons/fa"
 
-const UploadModal = ({ isOpen, onClose, onFileChange, onUpload, selectedFile }) => {
+const UploadModal = ({ isOpen, onClose, onFileChange, onUpload, selectedFile, inputMode = "image" }) => {
   const fileInputRef = useRef(null)
 
   if (!isOpen) return null
@@ -18,6 +18,8 @@ const UploadModal = ({ isOpen, onClose, onFileChange, onUpload, selectedFile }) 
     }
   }
 
+  const isLdrMode = inputMode === "ldr"
+
   return (
     <div className="modal-overlay">
       <div className="modal-content">
@@ -25,38 +27,55 @@ const UploadModal = ({ isOpen, onClose, onFileChange, onUpload, selectedFile }) 
           <FaTimes />
         </button>
 
-        <h2>Upload Your Image</h2>
-        <p>Choose an image to transform into a LEGO 3D model</p>
+        <h2>{isLdrMode ? "Upload Your LDR File" : "Upload Your Image"}</h2>
+        <p>
+          {isLdrMode
+            ? "Choose an LDR file to process and generate views"
+            : "Choose an image to transform into a LEGO 3D model"}
+        </p>
 
         <div className="format-info modal-format-info">
           <FaInfoCircle />
-          <span>Acceptable formats: PNG, JPG</span>
+          <span>{isLdrMode ? "Acceptable formats: LDR, MPD, DAT" : "Acceptable formats: PNG, JPG"}</span>
         </div>
 
         <div className={`upload-area ${selectedFile ? "has-file" : ""}`} onClick={handleFileClick}>
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/png, image/jpeg"
+            accept={isLdrMode ? ".ldr,.mpd,.dat" : "image/png, image/jpeg"}
             onChange={handleFileChange}
             className="file-input"
-            aria-label="Upload image file (PNG or JPG)"
+            aria-label={isLdrMode ? "Upload LDR file (LDR, MPD, or DAT)" : "Upload image file (PNG or JPG)"}
           />
 
           {selectedFile ? (
             <div className="file-preview">
-              <img
-                src={URL.createObjectURL(selectedFile) || "/placeholder.svg"}
-                alt="Preview of selected image"
-                className="preview-image"
-              />
-              <p className="file-name">{selectedFile.name}</p>
-              <p className="file-type">Type: {selectedFile.type}</p>
+              {isLdrMode ? (
+                <div className="ldr-file-preview">
+                  <FaDiceD6 style={{ fontSize: "4rem", color: "#D01012" }} />
+                  <p className="file-name">{selectedFile.name}</p>
+                </div>
+              ) : (
+                <>
+                  <img
+                    src={URL.createObjectURL(selectedFile) || "/placeholder.svg"}
+                    alt="Preview of selected image"
+                    className="preview-image"
+                  />
+                  <p className="file-name">{selectedFile.name}</p>
+                </>
+              )}
+              <p className="file-type">Type: {selectedFile.type || "LDR file"}</p>
             </div>
           ) : (
             <div className="upload-placeholder">
-              <FaCubes style={{ fontSize: "3rem", color: "#D01012" }} />
-              <p>Click to select a PNG or JPG image</p>
+              {isLdrMode ? (
+                <FaDiceD6 style={{ fontSize: "3rem", color: "#D01012" }} />
+              ) : (
+                <FaCubes style={{ fontSize: "3rem", color: "#D01012" }} />
+              )}
+              <p>{isLdrMode ? "Click to select an LDR, MPD, or DAT file" : "Click to select a PNG or JPG image"}</p>
               <p className="upload-instruction">You can click anywhere in this box to open the file selector</p>
             </div>
           )}
@@ -70,9 +89,15 @@ const UploadModal = ({ isOpen, onClose, onFileChange, onUpload, selectedFile }) 
             className="upload-button"
             onClick={onUpload}
             disabled={!selectedFile}
-            aria-label={selectedFile ? "Upload image" : "Upload button (disabled until an image is selected)"}
+            aria-label={
+              selectedFile
+                ? isLdrMode
+                  ? "Upload LDR file"
+                  : "Upload image"
+                : `Upload button (disabled until a${isLdrMode ? "n LDR file" : "n image"} is selected)`
+            }
           >
-            Upload Image
+            {isLdrMode ? "Upload LDR File" : "Upload Image"}
           </button>
         </div>
       </div>
@@ -81,3 +106,4 @@ const UploadModal = ({ isOpen, onClose, onFileChange, onUpload, selectedFile }) 
 }
 
 export default UploadModal
+

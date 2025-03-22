@@ -1,7 +1,7 @@
-Describe what you see in this image in detail.
-This is a picture that will be used to generate a 3d model.
-Please be precise on the main features of the image, while omitting any irrelevant details.
+Describe what you see in this image in a sentence or two.
 
-Your response should guide another model to generate a 3d model of the image.
+Be concise about the main subject of the image. Ignore background details.
 
-Give procedural instructions on what is the primary focus and priority of the image.
+Describe the color, texture, and shape of the main subject.
+
+Keep it under 20 words.
