@@ -13,13 +13,14 @@ const ThreeViewer = ({ modelUrl }) => {
   const rendererRef = useRef(null)
   const controlsRef = useRef(null)
   const modelRef = useRef(null)
+  const animationFrameRef = useRef(null)
 
   useEffect(() => {
     if (!containerRef.current) return
 
     // Initialize scene
     const scene = new THREE.Scene()
-    scene.background = new THREE.Color(0xf0f0f0)
+    scene.background = new THREE.Color(0xf5c518) // LEGO yellow background
     sceneRef.current = scene
 
     // Initialize camera
@@ -48,7 +49,7 @@ const ThreeViewer = ({ modelUrl }) => {
     controlsRef.current = controls
 
     // Add lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7)
     scene.add(ambientLight)
 
     const directionalLight = new THREE.DirectionalLight(0xffffff, 1)
@@ -56,14 +57,53 @@ const ThreeViewer = ({ modelUrl }) => {
     directionalLight.castShadow = true
     scene.add(directionalLight)
 
-    // Add grid helper
-    const gridHelper = new THREE.GridHelper(10, 10)
+    // Add LEGO-style grid
+    const gridSize = 20
+    const gridDivisions = 20
+    const gridHelper = new THREE.GridHelper(gridSize, gridDivisions, 0xd01012, 0x8d1b1b)
+    gridHelper.position.y = -2
     scene.add(gridHelper)
+
+    // Add LEGO base plate
+    const basePlateGeometry = new THREE.BoxGeometry(15, 0.5, 15)
+    const basePlateMaterial = new THREE.MeshStandardMaterial({
+      color: 0xd01012, // LEGO red
+      roughness: 0.3,
+      metalness: 0.2,
+    })
+    const basePlate = new THREE.Mesh(basePlateGeometry, basePlateMaterial)
+    basePlate.position.y = -2.25
+    basePlate.receiveShadow = true
+    scene.add(basePlate)
+
+    // Add LEGO studs to base plate
+    const studGeometry = new THREE.CylinderGeometry(0.3, 0.3, 0.2, 16)
+    const studMaterial = new THREE.MeshStandardMaterial({
+      color: 0xd01012, // LEGO red
+      roughness: 0.3,
+      metalness: 0.2,
+    })
+
+    for (let x = -6; x <= 6; x += 1.5) {
+      for (let z = -6; z <= 6; z += 1.5) {
+        const stud = new THREE.Mesh(studGeometry, studMaterial)
+        stud.position.set(x, -2, z)
+        stud.castShadow = true
+        stud.receiveShadow = true
+        scene.add(stud)
+      }
+    }
 
     // Animation loop
     const animate = () => {
-      requestAnimationFrame(animate)
+      animationFrameRef.current = requestAnimationFrame(animate)
       controls.update()
+
+      // Rotate the model slightly for a more dynamic presentation
+      if (modelRef.current) {
+        modelRef.current.rotation.y += 0.002
+      }
+
       renderer.render(scene, camera)
     }
     animate()
@@ -74,7 +114,7 @@ const ThreeViewer = ({ modelUrl }) => {
 
       camera.aspect = containerRef.current.clientWidth / containerRef.current.clientHeight
       camera.updateProjectionMatrix()
-      renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight)
+      renderer.setSize(containerRef.current.clientWidth / containerRef.current.clientHeight)
     }
     window.addEventListener("resize", handleResize)
 
@@ -86,6 +126,9 @@ const ThreeViewer = ({ modelUrl }) => {
       }
       if (modelRef.current) {
         scene.remove(modelRef.current)
+      }
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current)
       }
     }
   }, [])
@@ -106,10 +149,46 @@ const ThreeViewer = ({ modelUrl }) => {
     const loader = new GLTFLoader()
     loader.setDRACOLoader(dracoLoader)
 
+    // Add loading animation
+    const loadingManager = new THREE.LoadingManager()
+
+    loadingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
+      const progress = (itemsLoaded / itemsTotal) * 100
+      console.log(`Loading model: ${progress.toFixed(2)}% loaded`)
+    }
+
+    loader.setManager(loadingManager)
+
     loader.load(
       modelUrl,
       (gltf) => {
         const model = gltf.scene
+
+        // Apply LEGO-like material to the model
+        model.traverse((child) => {
+          if (child.isMesh) {
+            // Create a random LEGO color
+            const legoColors = [
+              0xd01012, // red
+              0xf5c518, // yellow
+              0x0d69ab, // blue
+              0x00852b, // green
+              0x05131d, // black
+              0xffffff, // white
+            ]
+
+            const randomColor = legoColors[Math.floor(Math.random() * legoColors.length)]
+
+            child.material = new THREE.MeshStandardMaterial({
+              color: randomColor,
+              roughness: 0.3,
+              metalness: 0.2,
+            })
+
+            child.castShadow = true
+            child.receiveShadow = true
+          }
+        })
 
         // Center model
         const box = new THREE.Box3().setFromObject(model)
@@ -119,6 +198,21 @@ const ThreeViewer = ({ modelUrl }) => {
         model.position.x = -center.x
         model.position.y = -center.y
         model.position.z = -center.z
+
+        // Add a small animation to make it appear like it's being built
+        model.scale.set(0.01, 0.01, 0.01)
+
+        // Animate the model scaling up
+        const scaleUp = () => {
+          if (model.scale.x < 1) {
+            model.scale.x += 0.02
+            model.scale.y += 0.02
+            model.scale.z += 0.02
+            setTimeout(scaleUp, 20)
+          }
+        }
+
+        scaleUp()
 
         // Adjust camera
         const maxDim = Math.max(size.x, size.y, size.z)
@@ -145,7 +239,7 @@ const ThreeViewer = ({ modelUrl }) => {
     )
   }, [modelUrl])
 
-  return <div ref={containerRef} style={{ width: "100%", height: "400px" }} />
+  return <div ref={containerRef} style={{ width: "100%", height: "400px", borderRadius: "8px" }} />
 }
 
 export default ThreeViewer

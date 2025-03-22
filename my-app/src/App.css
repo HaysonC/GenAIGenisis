@@ -1,20 +1,20 @@
-/* App.css */
+/* LEGO-themed App.css */
+@import url("https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700&display=swap");
+
 :root {
-  --primary-color: #4f46e5;
-  --primary-hover: #4338ca;
-  --secondary-color: #10b981;
-  --secondary-hover: #059669;
-  --background-color: #f9fafb;
-  --card-background: #ffffff;
-  --text-color: #1f2937;
-  --text-light: #6b7280;
-  --border-color: #e5e7eb;
-  --error-color: #ef4444;
-  --success-color: #10b981;
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --radius: 0.5rem;
+  --lego-red: #d01012;
+  --lego-yellow: #f5c518;
+  --lego-dark-red: #8d1b1b;
+  --lego-dark-yellow: #d4a017;
+  --lego-blue: #0d69ab;
+  --lego-green: #00852b;
+  --lego-black: #05131d;
+  --lego-gray: #a3a2a4;
+  --lego-light-gray: #e3e3e3;
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.2);
+  --radius: 8px;
 }
 
 * {
@@ -24,11 +24,14 @@
 }
 
 body {
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
-    "Helvetica Neue", sans-serif;
-  background-color: var(--background-color);
-  color: var(--text-color);
+  font-family: "Nunito", -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--lego-light-gray);
+  color: var(--lego-black);
   line-height: 1.5;
+  background-image: radial-gradient(circle, var(--lego-gray) 1px, transparent 1px),
+    radial-gradient(circle, var(--lego-gray) 1px, transparent 1px);
+  background-size: 20px 20px;
+  background-position: 0 0, 10px 10px;
 }
 
 .App {
@@ -40,24 +43,27 @@ body {
 .App-header {
   text-align: center;
   margin-bottom: 2rem;
+  animation: bounceIn 1s;
 }
 
 .App-header h1 {
-  font-size: 2.5rem;
-  font-weight: 700;
+  font-family: "Fredoka One", cursive;
+  font-size: 3rem;
   margin-bottom: 0.5rem;
-  background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--lego-red);
+  text-shadow: 3px 3px 0 var(--lego-yellow);
+  letter-spacing: 1px;
 }
 
 .App-header p {
-  font-size: 1.1rem;
-  color: var(--text-light);
+  font-size: 1.2rem;
+  color: var(--lego-black);
+  font-weight: 600;
 }
 
 .App-content {
   position: relative;
+  padding-bottom: 100px;
 }
 
 /* Upload Container */
@@ -69,7 +75,7 @@ body {
 }
 
 .upload-card {
-  background-color: var(--card-background);
+  background-color: var(--lego-yellow);
   border-radius: var(--radius);
   box-shadow: var(--shadow-md);
   padding: 2rem;
@@ -77,18 +83,51 @@ body {
   width: 100%;
   max-width: 500px;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.3s, box-shadow 0.3s;
+  position: relative;
+  border: 8px solid var(--lego-red);
+  overflow: hidden;
+}
+
+.upload-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 20px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--lego-yellow),
+    var(--lego-yellow) 20px,
+    var(--lego-dark-yellow) 20px,
+    var(--lego-dark-yellow) 40px
+  );
 }
 
 .upload-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-10px) rotate(2deg);
   box-shadow: var(--shadow-lg);
 }
 
 .upload-icon {
-  font-size: 3rem;
-  color: var(--primary-color);
+  font-size: 4rem;
+  color: var(--lego-red);
   margin-bottom: 1rem;
+  filter: drop-shadow(3px 3px 0 var(--lego-dark-red));
+  animation: pulse 2s infinite;
+}
+
+.upload-card h2 {
+  font-family: "Fredoka One", cursive;
+  color: var(--lego-red);
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.upload-card p {
+  color: var(--lego-black);
+  font-weight: 600;
 }
 
 /* Process Container */
@@ -107,25 +146,44 @@ body {
 .image-section,
 .description-section,
 .model-section {
-  background-color: var(--card-background);
+  background-color: white;
   border-radius: var(--radius);
   box-shadow: var(--shadow-md);
   padding: 1.5rem;
   overflow: hidden;
+  border: 6px solid var(--lego-red);
+  position: relative;
+}
+
+.image-section::after,
+.description-section::after,
+.model-section::after {
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  height: 8px;
+  border-radius: 4px;
+  background-color: var(--lego-yellow);
 }
 
 .image-section h2,
 .description-section h2,
 .model-section h2 {
-  margin-bottom: 1rem;
-  font-size: 1.5rem;
-  color: var(--primary-color);
+  font-family: "Fredoka One", cursive;
+  margin-bottom: 1.5rem;
+  margin-top: 0.5rem;
+  font-size: 1.8rem;
+  color: var(--lego-red);
+  text-shadow: 1px 1px 0 var(--lego-yellow);
 }
 
 .image-preview {
   width: 100%;
   border-radius: var(--radius);
   overflow: hidden;
+  border: 4px solid var(--lego-yellow);
 }
 
 .image-preview img {
@@ -136,11 +194,14 @@ body {
 
 .description-text {
   white-space: pre-wrap;
-  font-size: 0.95rem;
+  font-size: 1rem;
   line-height: 1.6;
   max-height: 300px;
   overflow-y: auto;
-  padding-right: 0.5rem;
+  padding: 1rem;
+  background-color: var(--lego-light-gray);
+  border-radius: var(--radius);
+  border: 3px solid var(--lego-yellow);
 }
 
 .model-viewer {
@@ -149,6 +210,7 @@ body {
   border-radius: var(--radius);
   overflow: hidden;
   margin-bottom: 1rem;
+  border: 4px solid var(--lego-yellow);
 }
 
 .chat-button {
@@ -156,29 +218,39 @@ body {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background-color: var(--primary-color);
+  background-color: var(--lego-blue);
   color: white;
   border: none;
   border-radius: var(--radius);
   padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  font-weight: 500;
+  font-size: 1.1rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
   width: 100%;
+  font-family: "Fredoka One", cursive;
+  box-shadow: 0 4px 0 var(--lego-dark-red);
 }
 
 .chat-button:hover {
-  background-color: var(--primary-hover);
+  background-color: var(--lego-green);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 var(--lego-dark-red);
+}
+
+.chat-button:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 var(--lego-dark-red);
 }
 
 /* Chat Container */
 .chat-container {
   grid-column: 1 / -1;
-  background-color: var(--card-background);
+  background-color: white;
   border-radius: var(--radius);
   box-shadow: var(--shadow-md);
   overflow: hidden;
+  border: 6px solid var(--lego-blue);
 }
 
 .chat-box {
@@ -192,16 +264,17 @@ body {
   align-items: center;
   gap: 0.75rem;
   padding: 1rem;
-  background-color: var(--primary-color);
+  background-color: var(--lego-blue);
   color: white;
 }
 
 .chat-icon {
-  font-size: 1.25rem;
+  font-size: 1.5rem;
 }
 
 .chat-header h3 {
-  font-size: 1.1rem;
+  font-family: "Fredoka One", cursive;
+  font-size: 1.3rem;
   font-weight: 600;
 }
 
@@ -212,12 +285,17 @@ body {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  background-color: var(--lego-light-gray);
+  background-image: linear-gradient(rgba(255, 255, 255, 0.5) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.5) 1px, transparent 1px);
+  background-size: 20px 20px;
 }
 
 .message {
   display: flex;
   gap: 0.75rem;
   max-width: 80%;
+  animation: messageSlide 0.3s ease-out;
 }
 
 .user-message {
@@ -233,32 +311,36 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
+  width: 2.5rem;
+  height: 2.5rem;
   border-radius: 50%;
-  background-color: var(--primary-color);
+  background-color: var(--lego-red);
   color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .user-message .message-icon {
-  background-color: var(--secondary-color);
+  background-color: var(--lego-yellow);
+  color: var(--lego-black);
 }
 
 .message-content {
-  background-color: var(--background-color);
+  background-color: white;
   padding: 0.75rem 1rem;
   border-radius: var(--radius);
   box-shadow: var(--shadow-sm);
+  border: 2px solid var(--lego-gray);
 }
 
 .user-message .message-content {
-  background-color: var(--primary-color);
-  color: white;
+  background-color: var(--lego-yellow);
+  border-color: var(--lego-dark-yellow);
 }
 
 .error-message .message-content {
   background-color: #fee2e2;
-  color: var(--error-color);
+  color: var(--lego-red);
+  border-color: var(--lego-red);
 }
 
 .typing-indicator {
@@ -270,7 +352,7 @@ body {
   width: 0.5rem;
   height: 0.5rem;
   border-radius: 50%;
-  background-color: var(--text-light);
+  background-color: var(--lego-red);
   animation: typing 1s infinite ease-in-out;
 }
 
@@ -300,77 +382,91 @@ body {
   display: flex;
   gap: 0.5rem;
   padding: 1rem;
-  border-top: 1px solid var(--border-color);
+  border-top: 1px solid var(--lego-gray);
+  background-color: white;
 }
 
 .chat-input textarea {
   flex: 1;
   padding: 0.75rem;
-  border: 1px solid var(--border-color);
+  border: 2px solid var(--lego-yellow);
   border-radius: var(--radius);
   resize: none;
   font-family: inherit;
-  font-size: 0.95rem;
+  font-size: 1rem;
   height: 60px;
 }
 
 .chat-input textarea:focus {
   outline: none;
-  border-color: var(--primary-color);
+  border-color: var(--lego-red);
+  box-shadow: 0 0 0 2px rgba(208, 16, 18, 0.3);
 }
 
 .send-button {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--primary-color);
+  background-color: var(--lego-red);
   color: white;
   border: none;
   border-radius: var(--radius);
   width: 60px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
+  box-shadow: 0 3px 0 var(--lego-dark-red);
 }
 
 .send-button:hover:not(:disabled) {
-  background-color: var(--primary-hover);
+  background-color: var(--lego-dark-red);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 0 var(--lego-dark-red);
+}
+
+.send-button:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--lego-dark-red);
 }
 
 .send-button:disabled {
-  background-color: var(--text-light);
+  background-color: var(--lego-gray);
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 /* Loading Overlay */
 .loading-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(255, 255, 255, 0.8);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 10;
-  backdrop-filter: blur(3px);
+  display: none; /* Hide the old overlay */
 }
 
 .loading-content {
-  background-color: var(--card-background);
+  background-color: white;
   padding: 2rem;
   border-radius: var(--radius);
   box-shadow: var(--shadow-lg);
   text-align: center;
   max-width: 400px;
   width: 90%;
+  border: 6px solid var(--lego-red);
+  position: relative;
+}
+
+.loading-content::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 12px;
+  background-color: var(--lego-yellow);
 }
 
 .spinner {
-  font-size: 2rem;
-  color: var(--primary-color);
+  font-size: 2.5rem;
+  color: var(--lego-red);
   animation: spin 1s linear infinite;
   margin-bottom: 1rem;
+  filter: drop-shadow(2px 2px 0 var(--lego-dark-red));
 }
 
 @keyframes spin {
@@ -382,18 +478,101 @@ body {
   }
 }
 
+.progress-container {
+  position: relative;
+  margin: 1.5rem 0;
+}
+
 .progress-bar {
-  height: 8px;
-  background-color: var(--border-color);
-  border-radius: 4px;
-  margin: 1rem 0;
+  height: 24px;
+  background-color: var(--lego-light-gray);
+  border-radius: 12px;
   overflow: hidden;
+  border: 3px solid var(--lego-black);
+  position: relative;
 }
 
 .progress-fill {
   height: 100%;
-  background-color: var(--primary-color);
-  transition: width 0.3s ease;
+  background: repeating-linear-gradient(
+    45deg,
+    var(--lego-red),
+    var(--lego-red) 20px,
+    var(--lego-yellow) 20px,
+    var(--lego-yellow) 40px
+  );
+  transition: width 0.5s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.lego-bricks {
+  position: absolute;
+  top: -20px;
+  left: 0;
+  width: 100%;
+  height: 20px;
+  display: flex;
+  transition: left 0.5s ease;
+}
+
+.lego-brick {
+  width: 30px;
+  height: 20px;
+  background-color: var(--lego-red);
+  margin-right: 5px;
+  border-radius: 3px 3px 0 0;
+  position: relative;
+}
+
+.lego-brick::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: 5px;
+  width: 8px;
+  height: 6px;
+  background-color: var(--lego-red);
+  border-radius: 3px 3px 0 0;
+}
+
+.lego-brick::after {
+  content: "";
+  position: absolute;
+  top: -6px;
+  right: 5px;
+  width: 8px;
+  height: 6px;
+  background-color: var(--lego-red);
+  border-radius: 3px 3px 0 0;
+}
+
+.lego-brick:nth-child(even) {
+  background-color: var(--lego-yellow);
+}
+
+.lego-brick:nth-child(even)::before,
+.lego-brick:nth-child(even)::after {
+  background-color: var(--lego-yellow);
+}
+
+.progress-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+  z-index: 1;
+}
+
+.loading-content p {
+  font-family: "Fredoka One", cursive;
+  font-size: 1.2rem;
+  color: var(--lego-black);
+  margin-top: 1rem;
 }
 
 /* Error Container */
@@ -402,12 +581,13 @@ body {
   padding: 1rem;
   background-color: #fee2e2;
   border-radius: var(--radius);
-  border-left: 4px solid var(--error-color);
+  border: 4px solid var(--lego-red);
+  animation: shake 0.5s;
 }
 
 .error-message {
-  color: var(--error-color);
-  font-weight: 500;
+  color: var(--lego-red);
+  font-weight: 700;
 }
 
 /* Actions Container */
@@ -417,20 +597,42 @@ body {
   margin-top: 2rem;
 }
 
+.generate-button,
 .reset-button {
-  background-color: var(--secondary-color);
+  background-color: var(--lego-red);
   color: white;
   border: none;
   border-radius: var(--radius);
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  font-weight: 500;
+  padding: 1rem 2rem;
+  font-size: 1.2rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.3s;
+  font-family: "Fredoka One", cursive;
+  box-shadow: 0 6px 0 var(--lego-dark-red);
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
+.generate-button {
+  background-color: var(--lego-red);
+  animation: pulse 2s infinite;
+}
+
+.reset-button {
+  background-color: var(--lego-green);
+}
+
+.generate-button:hover,
 .reset-button:hover {
-  background-color: var(--secondary-hover);
+  transform: translateY(-3px);
+  box-shadow: 0 9px 0 var(--lego-dark-red);
+}
+
+.generate-button:active,
+.reset-button:active {
+  transform: translateY(3px);
+  box-shadow: 0 3px 0 var(--lego-dark-red);
 }
 
 /* Modal */
@@ -440,67 +642,95 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 100;
-  backdrop-filter: blur(3px);
+  backdrop-filter: blur(5px);
+  animation: fadeIn 0.3s;
 }
 
 .modal-content {
-  background-color: var(--card-background);
+  background-color: white;
   border-radius: var(--radius);
   box-shadow: var(--shadow-lg);
   padding: 2rem;
   max-width: 500px;
   width: 90%;
   position: relative;
+  border: 8px solid var(--lego-red);
+  animation: modalSlideIn 0.5s;
+}
+
+.modal-content::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 15px;
+  background-color: var(--lego-yellow);
 }
 
 .modal-close {
   position: absolute;
   top: 1rem;
   right: 1rem;
-  background: none;
+  background: var(--lego-red);
   border: none;
   font-size: 1.25rem;
-  color: var(--text-light);
+  color: white;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  transition: color 0.2s;
+  transition: all 0.2s;
+  z-index: 1;
 }
 
 .modal-close:hover {
-  color: var(--text-color);
+  background-color: var(--lego-dark-red);
+  transform: rotate(90deg);
 }
 
 .modal-content h2 {
+  font-family: "Fredoka One", cursive;
   margin-bottom: 0.5rem;
-  font-size: 1.5rem;
+  margin-top: 0.5rem;
+  font-size: 2rem;
+  color: var(--lego-red);
 }
 
 .modal-content p {
-  color: var(--text-light);
+  color: var(--lego-black);
   margin-bottom: 1.5rem;
+  font-weight: 600;
 }
 
 .upload-area {
-  border: 2px dashed var(--border-color);
+  border: 3px dashed var(--lego-yellow);
   border-radius: var(--radius);
   padding: 2rem;
   text-align: center;
   cursor: pointer;
-  transition: border-color 0.2s;
+  transition: all 0.3s;
   margin-bottom: 1.5rem;
+  background-color: var(--lego-light-gray);
 }
 
 .upload-area:hover {
-  border-color: var(--primary-color);
+  border-color: var(--lego-red);
+  transform: scale(1.02);
 }
 
 .upload-area.has-file {
   border-style: solid;
-  border-color: var(--primary-color);
+  border-color: var(--lego-green);
+  background-color: rgba(0, 133, 43, 0.1);
 }
 
 .file-input {
@@ -525,6 +755,7 @@ body {
   max-width: 100%;
   max-height: 200px;
   border-radius: var(--radius);
+  border: 3px solid var(--lego-yellow);
 }
 
 .modal-actions {
@@ -534,39 +765,149 @@ body {
 }
 
 .cancel-button {
-  background-color: transparent;
-  color: var(--text-color);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius);
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.cancel-button:hover {
-  background-color: var(--border-color);
-}
-
-.upload-button {
-  background-color: var(--primary-color);
+  background-color: var(--lego-gray);
   color: white;
   border: none;
   border-radius: var(--radius);
   padding: 0.75rem 1.5rem;
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: 700;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
+  box-shadow: 0 3px 0 var(--lego-black);
+}
+
+.cancel-button:hover {
+  background-color: var(--lego-black);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 0 var(--lego-black);
+}
+
+.cancel-button:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--lego-black);
+}
+
+.upload-button {
+  background-color: var(--lego-red);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 3px 0 var(--lego-dark-red);
 }
 
 .upload-button:hover:not(:disabled) {
-  background-color: var(--primary-hover);
+  background-color: var(--lego-dark-red);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 0 var(--lego-dark-red);
+}
+
+.upload-button:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--lego-dark-red);
 }
 
 .upload-button:disabled {
-  background-color: var(--text-light);
+  background-color: var(--lego-gray);
   cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Animations */
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-5px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(5px);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes messageSlide {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes buildBrick {
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 @media (max-width: 768px) {
@@ -575,7 +916,7 @@ body {
   }
 
   .App-header h1 {
-    font-size: 2rem;
+    font-size: 2.2rem;
   }
 
   .modal-content {
@@ -595,5 +936,312 @@ body {
   .upload-button {
     width: 100%;
   }
+}
+
+/* Add these new styles for the bottom progress bar and spinning brick */
+.bottom-progress-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: white;
+  padding: 1rem;
+  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
+  z-index: 50;
+  border-top: 4px solid var(--lego-red);
+}
+
+.progress-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.progress-status p {
+  font-family: "Fredoka One", cursive;
+  font-size: 1.2rem;
+  color: var(--lego-black);
+  margin: 0;
+}
+
+.spinning-brick {
+  width: 30px;
+  height: 20px;
+  background-color: var(--lego-red);
+  border-radius: 3px 3px 0 0;
+  position: relative;
+  animation: spinBrick 1.5s infinite linear;
+}
+
+.spinning-brick::before,
+.spinning-brick::after {
+  content: "";
+  position: absolute;
+  top: -6px;
+  width: 8px;
+  height: 6px;
+  background-color: var(--lego-red);
+  border-radius: 3px 3px 0 0;
+}
+
+.spinning-brick::before {
+  left: 5px;
+}
+
+.spinning-brick::after {
+  right: 5px;
+}
+
+@keyframes spinBrick {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.progress-bar-container {
+  padding: 0 1rem;
+}
+
+.progress-bar {
+  height: 24px;
+  background-color: var(--lego-light-gray);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 3px solid var(--lego-black);
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  background: repeating-linear-gradient(
+    45deg,
+    var(--lego-red),
+    var(--lego-red) 20px,
+    var(--lego-yellow) 20px,
+    var(--lego-yellow) 40px
+  );
+  transition: width 0.5s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.lego-bricks {
+  position: absolute;
+  top: -20px;
+  left: 0;
+  width: 100%;
+  height: 20px;
+  display: flex;
+  transition: left 0.5s ease;
+}
+
+.lego-brick {
+  width: 30px;
+  height: 20px;
+  background-color: var(--lego-red);
+  margin-right: 5px;
+  border-radius: 3px 3px 0 0;
+  position: relative;
+}
+
+.lego-brick::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: 5px;
+  width: 8px;
+  height: 6px;
+  background-color: var(--lego-red);
+  border-radius: 3px 3px 0 0;
+}
+
+.lego-brick::after {
+  content: "";
+  position: absolute;
+  top: -6px;
+  right: 5px;
+  width: 8px;
+  height: 6px;
+  background-color: var(--lego-red);
+  border-radius: 3px 3px 0 0;
+}
+
+.lego-brick:nth-child(even) {
+  background-color: var(--lego-yellow);
+}
+
+.lego-brick:nth-child(even)::before,
+.lego-brick:nth-child(even)::after {
+  background-color: var(--lego-yellow);
+}
+
+.progress-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+  z-index: 1;
+}
+
+/* Add these new styles for accessibility features and format info */
+
+/* Format information */
+.format-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: var(--lego-light-gray);
+  border-radius: var(--radius);
+  font-weight: 600;
+  border: 2px solid var(--lego-yellow);
+}
+
+.modal-format-info {
+  margin-bottom: 1rem;
+}
+
+/* Instructions panel */
+.instructions-panel {
+  margin-top: 2rem;
+  background-color: white;
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  border: 6px solid var(--lego-blue);
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.instructions-panel h3 {
+  font-family: "Fredoka One", cursive;
+  color: var(--lego-blue);
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.instructions-panel ol {
+  padding-left: 1.5rem;
+}
+
+.instructions-panel li {
+  margin-bottom: 0.75rem;
+  line-height: 1.5;
+}
+
+/* File information */
+.image-info {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background-color: var(--lego-light-gray);
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+}
+
+.file-name,
+.file-type {
+  margin: 0.5rem 0;
+}
+
+/* Upload instructions */
+.upload-instruction {
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  color: var(--lego-gray);
+}
+
+/* Model controls */
+.model-controls {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.model-controls p {
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  background-color: var(--lego-light-gray);
+  padding: 0.75rem;
+  border-radius: var(--radius);
+  border: 2px solid var(--lego-yellow);
+}
+
+/* Accessibility controls */
+.accessibility-controls {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+}
+
+.contrast-toggle {
+  background-color: var(--lego-black);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.contrast-toggle:hover {
+  background-color: var(--lego-blue);
+}
+
+/* High contrast mode */
+.high-contrast {
+  --lego-red: #ff0000;
+  --lego-yellow: #ffff00;
+  --lego-dark-red: #cc0000;
+  --lego-dark-yellow: #cccc00;
+  --lego-blue: #0000ff;
+  --lego-green: #00cc00;
+  --lego-black: #000000;
+  --lego-gray: #666666;
+  --lego-light-gray: #eeeeee;
+}
+
+.high-contrast .App-header h1 {
+  text-shadow: 2px 2px 0 #000000;
+  color: #ff0000;
+}
+
+.high-contrast .description-text,
+.high-contrast .image-info,
+.high-contrast .format-info,
+.high-contrast .model-controls p {
+  background-color: #ffffff;
+  border: 2px solid #000000;
+  color: #000000;
+}
+
+.high-contrast .error-container {
+  background-color: #ffcccc;
+  border: 4px solid #ff0000;
+}
+
+.high-contrast .error-message {
+  color: #ff0000;
+}
+
+.high-contrast .progress-text {
+  color: #000000;
+  text-shadow: 1px 1px 0 #ffffff;
+  font-weight: 900;
+}
+
+.high-contrast .bottom-progress-container {
+  background-color: #ffffff;
+  border-top: 4px solid #000000;
 }
 

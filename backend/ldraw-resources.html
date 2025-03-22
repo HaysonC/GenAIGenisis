@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LDraw Rendering Requirements</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    h1, h2, h3 {
+      color: #d01012;
+    }
+    code {
+      background-color: #f5f5f5;
+      padding: 2px 5px;
+      border-radius: 3px;
+      font-family: Consolas, Monaco, 'Andale Mono', monospace;
+    }
+    pre {
+      background-color: #f5f5f5;
+      padding: 15px;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+    .note {
+      background-color: #fff8e1;
+      border-left: 4px solid #ffc107;
+      padding: 15px;
+      margin: 15px 0;
+    }
+    .warning {
+      background-color: #ffebee;
+      border-left: 4px solid #f44336;
+      padding: 15px;
+      margin: 15px 0;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 20px 0;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px 12px;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    a {
+      color: #0d69ab;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h1>LDraw Rendering Requirements</h1>
+
+  <div class="warning">
+    <h3>Important Notice</h3>
+    <p>This application requires at least one LDraw rendering tool to be installed on the server. Without a proper rendering tool, the application will not be able to process LDR files and will return errors.</p>
+  </div>
+
+  <h2>Required Components</h2>
+
+  <h3>1. LDraw Parts Library</h3>
+  <p>The LDraw Parts Library is essential for all rendering tools to function properly.</p>
+
+  <ol>
+    <li>Download the complete LDraw Parts Library from <a href="https://www.ldraw.org/parts/latest-parts.html" target="_blank">https://www.ldraw.org/parts/latest-parts.html</a></li>
+    <li>Extract the contents to a directory on your system</li>
+    <li>Set the <code>LDRAW_PARTS_PATH</code> environment variable to point to this directory</li>
+  </ol>
+
+  <h3>2. At Least One Rendering Tool</h3>
+  <p>You must install at least one of the following rendering tools:</p>
+
+  <h4>Option A: LDView (Recommended)</h4>
+  <ul>
+    <li><strong>Windows:</strong> Download from <a href="https://tcobbs.github.io/ldview/" target="_blank">https://tcobbs.github.io/ldview/</a></li>
+    <li><strong>macOS:</strong> Available via Homebrew: <code>brew install ldview</code></li>
+    <li><strong>Linux:</strong> Available in some package managers or build from source: <a href="https://github.com/tcobbs/ldview" target="_blank">https://github.com/tcobbs/ldview</a></li>
+  </ul>
+
+  <h4>Option B: LeoCAD</h4>
+  <ul>
+    <li>Download from <a href="https://www.leocad.org/download.html" target="_blank">https://www.leocad.org/download.html</a></li>
+  </ul>
+
+  <h4>Option C: L3P and POV-Ray</h4>
+  <ul>
+    <li><strong>L3P:</strong> Download from <a href="https://l3p.dev/" target="_blank">https://l3p.dev/</a></li>
+    <li><strong>POV-Ray:</strong> Download from <a href="https://www.povray.org/download/" target="_blank">https://www.povray.org/download/</a></li>
+  </ul>
+
+  <h2>Environment Setup</h2>
+
+  <h3>Environment Variables</h3>
+  <table>
+    <tr>
+      <th>Variable</th>
+      <th>Description</th>
+      <th>Required</th>
+    </tr>
+    <tr>
+      <td>LDRAW_PARTS_PATH</td>
+      <td>Path to the LDraw parts library</td>
+      <td>Yes</td>
+    </tr>
+    <tr>
+      <td>GEMINI_API_KEY</td>
+      <td>API key for Gemini (for generating instructions)</td>
+      <td>Yes</td>
+    </tr>
+  </table>
+
+  <h3>Path Configuration</h3>
+  <p>Make sure the rendering tools are in your system's PATH environment variable so they can be executed from anywhere.</p>
+
+  <h2>Troubleshooting</h2>
+
+  <h3>Common Errors</h3>
+
+  <table>
+    <tr>
+      <th>Error</th>
+      <th>Possible Solution</th>
+    </tr>
+    <tr>
+      <td>"Failed to render LDR file. All methods failed"</td>
+      <td>
+        <ul>
+          <li>Ensure at least one rendering tool is installed</li>
+          <li>Check that the tools are in your PATH</li>
+          <li>Verify the LDraw parts library is correctly installed</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>"LDView not available" or similar</td>
+      <td>
+        <ul>
+          <li>Install the mentioned tool</li>
+          <li>Add the tool's installation directory to your PATH</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>"LDR file not found"</td>
+      <td>
+        <ul>
+          <li>Check that the uploaded file is a valid LDR file</li>
+          <li>Ensure the uploads directory is writable</li>
+        </ul>
+      </td>
+    </tr>
+  </table>
+
+  <h3>Checking Tool Installation</h3>
+
+  <p>You can verify if the required tools are installed by running these commands in your terminal:</p>
+
+  <pre><code># Check LDView
+ldview -version
+
+# Check LeoCAD
+leocad --version
+
+# Check L3P
+l3p -h
+
+# Check POV-Ray
+povray -v</code></pre>
+
+  <h2>Additional Resources</h2>
+
+  <ul>
+    <li><a href="https://www.ldraw.org/" target="_blank">LDraw.org</a> - Official LDraw website</li>
+    <li><a href="https://www.ldraw.org/article/218.html" target="_blank">LDraw File Format Specification</a></li>
+    <li><a href="https://www.ldraw.org/article/104.html" target="_blank">LDraw Tools Overview</a></li>
+  </ul>
+
+  <div class="note">
+    <p><strong>Note:</strong> This application does not create placeholder images when rendering fails. It will return an error message instead, so it's essential to have the proper rendering tools installed.</p>
+  </div>
+</body>
+</html>

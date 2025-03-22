@@ -1,7 +1,7 @@
 "use client"
 
 import { useRef } from "react"
-import { FaUpload, FaTimes } from "react-icons/fa"
+import { FaTimes, FaCubes, FaInfoCircle } from "react-icons/fa"
 
 const UploadModal = ({ isOpen, onClose, onFileChange, onUpload, selectedFile }) => {
   const fileInputRef = useRef(null)
@@ -21,29 +21,43 @@ const UploadModal = ({ isOpen, onClose, onFileChange, onUpload, selectedFile }) 
   return (
     <div className="modal-overlay">
       <div className="modal-content">
-        <button className="modal-close" onClick={onClose}>
+        <button className="modal-close" onClick={onClose} aria-label="Close">
           <FaTimes />
         </button>
 
-        <h2>Upload an Image</h2>
-        <p>Upload an image to generate a 3D model</p>
+        <h2>Upload Your Image</h2>
+        <p>Choose an image to transform into a LEGO 3D model</p>
+
+        <div className="format-info modal-format-info">
+          <FaInfoCircle />
+          <span>Acceptable formats: PNG, JPG</span>
+        </div>
 
         <div className={`upload-area ${selectedFile ? "has-file" : ""}`} onClick={handleFileClick}>
-          <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="file-input" />
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/png, image/jpeg"
+            onChange={handleFileChange}
+            className="file-input"
+            aria-label="Upload image file (PNG or JPG)"
+          />
 
           {selectedFile ? (
             <div className="file-preview">
               <img
                 src={URL.createObjectURL(selectedFile) || "/placeholder.svg"}
-                alt="Preview"
+                alt="Preview of selected image"
                 className="preview-image"
               />
-              <p>{selectedFile.name}</p>
+              <p className="file-name">{selectedFile.name}</p>
+              <p className="file-type">Type: {selectedFile.type}</p>
             </div>
           ) : (
             <div className="upload-placeholder">
-              <FaUpload className="upload-icon" />
-              <p>Click to select or drag an image here</p>
+              <FaCubes style={{ fontSize: "3rem", color: "#D01012" }} />
+              <p>Click to select a PNG or JPG image</p>
+              <p className="upload-instruction">You can click anywhere in this box to open the file selector</p>
             </div>
           )}
         </div>
@@ -52,8 +66,13 @@ const UploadModal = ({ isOpen, onClose, onFileChange, onUpload, selectedFile }) 
           <button className="cancel-button" onClick={onClose}>
             Cancel
           </button>
-          <button className="upload-button" onClick={onUpload} disabled={!selectedFile}>
-            Generate 3D Model
+          <button
+            className="upload-button"
+            onClick={onUpload}
+            disabled={!selectedFile}
+            aria-label={selectedFile ? "Upload image" : "Upload button (disabled until an image is selected)"}
+          >
+            Upload Image
           </button>
         </div>
       </div>
@@ -62,4 +81,3 @@ const UploadModal = ({ isOpen, onClose, onFileChange, onUpload, selectedFile }) 
 }
 
 export default UploadModal
-

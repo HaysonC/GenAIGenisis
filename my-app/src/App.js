@@ -1,12 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import "./App.css"
 import axios from "axios"
 import ThreeViewer from "./components/ThreeViewer"
 import ChatBox from "./components/ChatBox"
 import UploadModal from "./components/UploadModal"
-import { FaUpload, FaRobot, FaSpinner } from "react-icons/fa"
+import { FaCube, FaTools, FaCubes, FaInfoCircle } from "react-icons/fa"
 
 const API_BASE_URL = "http://localhost:5001"
 
@@ -22,9 +22,32 @@ function App() {
   const [error, setError] = useState("")
   const [currentStep, setCurrentStep] = useState("upload") // upload, describe, generate, view
   const [generationProgress, setGenerationProgress] = useState(0)
+  const [isImageUploaded, setIsImageUploaded] = useState(false)
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [highContrast, setHighContrast] = useState(false)
+  const bricksRef = useRef(null)
+
+  // Animation for LEGO bricks in progress bar
+  useEffect(() => {
+    if (bricksRef.current && loading) {
+      const bricks = bricksRef.current.children
+      for (let i = 0; i < bricks.length; i++) {
+        setTimeout(() => {
+          bricks[i].style.animation = "buildBrick 0.5s forwards"
+        }, i * 100)
+      }
+    }
+  }, [loading, generationProgress])
 
   const handleFileChange = (file) => {
     if (file) {
+      // Check if file is PNG or JPG
+      const fileType = file.type
+      if (fileType !== "image/png" && fileType !== "image/jpeg") {
+        setError("Please select a PNG or JPG image file")
+        return
+      }
+
       setSelectedFile(file)
       setPreviewUrl(URL.createObjectURL(file))
       setError("")
@@ -36,11 +59,6 @@ function App() {
       setError("Please select an image first")
       return
     }
-
-    setLoading(true)
-    setError("")
-    setCurrentStep("describe")
-    setGenerationProgress(25)
 
     try {
       // Create form data for image upload
@@ -56,7 +74,31 @@ function App() {
         throw new Error("Failed to upload image")
       }
 
-      // Step 2: Get the description from Gemini
+      // Close modal and show the image preview
+      setIsModalOpen(false)
+      setIsImageUploaded(true)
+      setCurrentStep("ready")
+    } catch (err) {
+      console.error("Error uploading image:", err)
+      const errorMessage = err.response?.data?.message || err.message || "An error occurred during upload"
+      setError(errorMessage)
+    }
+  }
+
+  const handleGenerateModel = async () => {
+    if (!selectedFile || !isImageUploaded) {
+      setError("Please upload an image first")
+      return
+    }
+
+    setLoading(true)
+    setError("")
+    setCurrentStep("describe")
+    setGenerationProgress(25)
+    setIsGenerating(true)
+
+    try {
+      // Step 1: Get the description from Gemini
       const predictionResponse = await axios.get(`${API_BASE_URL}/predict`)
 
       if (predictionResponse.data.text) {
@@ -64,7 +106,7 @@ function App() {
         setCurrentStep("generate")
         setGenerationProgress(50)
 
-        // Step 3: Generate 3D model from description
+        // Step 2: Generate 3D model from description
         const modelResponse = await axios.post(`${API_BASE_URL}/generate-model`, {
           prompt: predictionResponse.data.text,
           options: {
@@ -88,11 +130,11 @@ function App() {
       console.error("Error processing image:", err)
       const errorMessage = err.response?.data?.message || err.message || "An error occurred during processing"
       setError(errorMessage)
-      setCurrentStep("upload")
+      setCurrentStep("ready")
       setGenerationProgress(0)
     } finally {
       setLoading(false)
-      setIsModalOpen(false)
+      setIsGenerating(false)
     }
   }
 
@@ -104,6 +146,7 @@ function App() {
 
     setLoading(true)
     setError("")
+    setGenerationProgress(50)
 
     try {
       const response = await axios.post(`${API_BASE_URL}/improve-model`, {
@@ -114,6 +157,7 @@ function App() {
       if (response.data.url) {
         setModelUrl(response.data.url)
         setModelId(response.data.filename)
+        setGenerationProgress(100)
       } else {
         throw new Error("No model URL received")
       }
@@ -135,53 +179,110 @@ function App() {
     setCurrentStep("upload")
     setGenerationProgress(0)
     setError("")
+    setIsImageUploaded(false)
+  }
+
+  // Create LEGO bricks for progress bar
+  const renderLegoBricks = () => {
+    const bricks = []
+    const numBricks = 10
+    for (let i = 0; i < numBricks; i++) {
+      bricks.push(<div key={i} className="lego-brick" style={{ opacity: 0 }}></div>)
+    }
+    return bricks
+  }
+
+  const toggleContrast = () => {
+    setHighContrast(!highContrast)
   }
 
   return (
-    <div className="App">
+    <div className={`App ${highContrast ? 'high-contrast' : ''}`}>
       <header className="App-header">
-        <h1>3D Model Generator</h1>
-        <p>Upload an image and get an AI-generated 3D model</p>
+        <h1>LEGO 3D Model Creator</h1>
+        <p>Upload an image and build your own 3D LEGO model!</p>
+        <div className="accessibility-controls">
+          <button
+            className="contrast-toggle"
+            onClick={toggleContrast}
+            aria-label={highContrast ? "Switch to standard contrast" : "Switch to high contrast"}
+          >
+            {highContrast ? "Standard Contrast" : "High Contrast"}
+          </button>
+        </div>
       </header>
 
       <main className="App-content">
-        {currentStep === "upload" && !modelUrl && (
+        {currentStep === "upload" && !isImageUploaded && (
           <div className="upload-container">
             <div className="upload-card" onClick={() => setIsModalOpen(true)}>
-              <FaUpload className="upload-icon" />
-              <h2>Upload an Image</h2>
-              <p>Upload an image to generate a 3D model</p>
+              <FaCubes className="upload-icon" />
+              <h2>Start Building!</h2>
+              <p>Click here to upload an image</p>
+              <div className="format-info">
+                <FaInfoCircle />
+                <span>Acceptable formats: PNG, JPG</span>
+              </div>
+            </div>
+            <div className="instructions-panel">
+              <h3>How to Use This App:</h3>
+              <ol>
+                <li>Click the box above to upload a PNG or JPG image</li>
+                <li>After uploading, click the "Build 3D Model" button</li>
+                <li>Wait while the computer creates your 3D model</li>
+                <li>View and interact with your 3D LEGO model</li>
+                <li>Use the "Modify LEGO Model" button to make changes</li>
+              </ol>
             </div>
           </div>
         )}
 
-        {(currentStep !== "upload" || modelUrl) && (
+        {(isImageUploaded || currentStep !== "upload") && (
           <div className="process-container">
             {previewUrl && (
               <div className="image-section">
-                <h2>Original Image</h2>
+                <h2>Your Image</h2>
                 <div className="image-preview">
-                  <img src={previewUrl || "/placeholder.svg"} alt="Preview" />
+                  <img src={previewUrl || "/placeholder.svg"} alt="Your uploaded image" />
+                </div>
+                <div className="image-info">
+                  <p>File name: {selectedFile?.name}</p>
+                  <p>File type: {selectedFile?.type}</p>
                 </div>
               </div>
             )}
 
-            {description && (
+            {description ? (
               <div className="description-section">
-                <h2>AI Description</h2>
+                <h2>LEGO Instructions</h2>
                 <div className="description-text">{description}</div>
               </div>
+            ) : (
+              isImageUploaded &&
+              currentStep === "ready" && (
+                <div className="description-section">
+                  <h2>Ready to Build!</h2>
+                  <div className="description-text">
+                    <p>Your image has been uploaded successfully.</p>
+                    <p>Next step: Click the "Build 3D Model" button below to start creating your LEGO model.</p>
+                    <p>This will analyze your image and create a 3D model based on it.</p>
+                  </div>
+                </div>
+              )
             )}
 
             {modelUrl && (
               <div className="model-section">
-                <h2>3D Model</h2>
+                <h2>Your 3D LEGO Model</h2>
                 <div className="model-viewer">
                   <ThreeViewer modelUrl={modelUrl} />
                 </div>
-                <button className="chat-button" onClick={() => setIsChatOpen(!isChatOpen)}>
-                  <FaRobot /> {isChatOpen ? "Close Chat" : "Open AI Chat"}
-                </button>
+                <div className="model-controls">
+                  <p>You can rotate the model by clicking and dragging. Zoom with the scroll wheel.</p>
+                  <button className="chat-button" onClick={() => setIsChatOpen(!isChatOpen)}>
+                    <FaTools /> {isChatOpen ? "Hide LEGO Tools" : "Modify LEGO Model"}
+                  </button>
+                </div>
               </div>
             )}
 
@@ -190,41 +291,57 @@ function App() {
                 <ChatBox onSendMessage={handleImproveModel} />
               </div>
             )}
+          </div>
+        )}
 
-            {loading && (
-              <div className="loading-overlay">
-                <div className="loading-content">
-                  <FaSpinner className="spinner" />
-                  <div className="progress-bar">
-                    <div className="progress-fill" style={{ width: `${generationProgress}%` }}></div>
-                  </div>
-                  <p>
-                    {currentStep === "describe"
-                      ? "Analyzing image..."
-                      : currentStep === "generate"
-                        ? "Generating 3D model..."
-                        : "Processing..."}
-                  </p>
-                </div>
-              </div>
-            )}
+        {isImageUploaded && !modelUrl && !isGenerating && (
+          <div className="actions-container">
+            <button className="generate-button" onClick={handleGenerateModel}>
+              <FaCube /> Build 3D Model
+            </button>
           </div>
         )}
 
         {error && (
           <div className="error-container">
-            <div className="error-message">{error}</div>
+            <div className="error-message">
+              <FaInfoCircle /> {error}
+            </div>
           </div>
         )}
 
         {modelUrl && (
           <div className="actions-container">
             <button className="reset-button" onClick={resetProcess}>
-              Start New Project
+              Build Something New
             </button>
           </div>
         )}
       </main>
+
+      {loading && (
+        <div className="bottom-progress-container">
+          <div className="progress-status">
+            <div className="spinning-brick"></div>
+            <p>
+              {currentStep === "describe"
+                ? "Reading LEGO Instructions..."
+                : currentStep === "generate"
+                  ? "Building LEGO Bricks..."
+                  : "Assembling Your Model..."}
+            </p>
+          </div>
+          <div className="progress-bar-container">
+            <div className="progress-bar">
+              <div className="progress-fill" style={{ width: `${generationProgress}%` }}></div>
+              <div className="lego-bricks" ref={bricksRef} style={{ left: `${generationProgress - 10}%` }}>
+                {renderLegoBricks()}
+              </div>
+              <div className="progress-text">{generationProgress}% Complete</div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <UploadModal
         isOpen={isModalOpen}
@@ -238,4 +355,3 @@ function App() {
 }
 
 export default App
-

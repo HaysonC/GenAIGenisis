@@ -1,13 +1,13 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { FaPaperPlane, FaRobot, FaUser } from "react-icons/fa"
+import { FaPaperPlane, FaUser, FaCubes } from "react-icons/fa"
 
 const ChatBox = ({ onSendMessage }) => {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Hi there! I can help you improve your 3D model. Just tell me what changes you'd like to make.",
+      text: "Hi there, LEGO Master! I can help you improve your 3D model. Just tell me what changes you'd like to make to your LEGO creation!",
       sender: "ai",
     },
   ])
@@ -35,7 +35,7 @@ const ChatBox = ({ onSendMessage }) => {
       // Add AI response
       const aiMessage = {
         id: messages.length + 2,
-        text: "I've updated your 3D model based on your instructions. Take a look!",
+        text: "I've updated your LEGO model with your awesome ideas! Check it out!",
         sender: "ai",
       }
 
@@ -46,7 +46,7 @@ const ChatBox = ({ onSendMessage }) => {
       // Add error message
       const errorMessage = {
         id: messages.length + 2,
-        text: "Sorry, I couldn't update the model. Please try again with different instructions.",
+        text: "Oops! I couldn't update the LEGO model. Let's try again with different instructions!",
         sender: "ai",
         isError: true,
       }
@@ -71,8 +71,8 @@ const ChatBox = ({ onSendMessage }) => {
   return (
     <div className="chat-box">
       <div className="chat-header">
-        <FaRobot className="chat-icon" />
-        <h3>AI Assistant</h3>
+        <FaCubes className="chat-icon" />
+        <h3>LEGO Master Builder</h3>
       </div>
 
       <div className="chat-messages">
@@ -81,7 +81,7 @@ const ChatBox = ({ onSendMessage }) => {
             key={message.id}
             className={`message ${message.sender === "user" ? "user-message" : "ai-message"} ${message.isError ? "error-message" : ""}`}
           >
-            <div className="message-icon">{message.sender === "user" ? <FaUser /> : <FaRobot />}</div>
+            <div className="message-icon">{message.sender === "user" ? <FaUser /> : <FaCubes />}</div>
             <div className="message-content">
               <p>{message.text}</p>
             </div>
@@ -90,7 +90,7 @@ const ChatBox = ({ onSendMessage }) => {
         {isLoading && (
           <div className="message ai-message loading">
             <div className="message-icon">
-              <FaRobot />
+              <FaCubes />
             </div>
             <div className="message-content">
               <div className="typing-indicator">
@@ -109,7 +109,7 @@ const ChatBox = ({ onSendMessage }) => {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={handleKeyPress}
-          placeholder="Type your instructions here..."
+          placeholder="Tell me how to improve your LEGO model..."
           disabled={isLoading}
         />
         <button onClick={handleSend} disabled={!input.trim() || isLoading} className="send-button">
