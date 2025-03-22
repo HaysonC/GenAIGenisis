@@ -1,14 +1,14 @@
-# LEGO Model Generator (Final Refined Version)
+# LEGO Model Generator (Final Version with Interior/Exterior Mask for Solid Fill)
 
 import os
 import numpy as np
 from pathlib import Path
 import trimesh
-from scipy.ndimage import label
+from scipy.ndimage import label, binary_fill_holes
 from scipy.spatial import distance
 
 # Step 0: Uniform Rescale with Centering
-def rescale_obj_uniform(input_path, output_path, target_dims=(32, 32, 30)):
+def rescale_obj_uniform(input_path, output_path, target_dims=(64, 64, 30)):
     mesh = trimesh.load(input_path, force='mesh')
     bounds = mesh.bounds
     scale_factors = np.array(target_dims) / (bounds[1] - bounds[0])
@@ -26,7 +26,7 @@ def voxelize_obj_trimesh(path, pitch=1.0):
     voxelized = mesh.voxelized(pitch=pitch)
     return voxelized.matrix.astype(int)
 
-# Step 2: Component Connectivity Enforcement
+# Step 2: Ensure Connectivity (Minimal 1x1 Bridging)
 def connect_components_minimal(voxels):
     structure = np.ones((3, 3, 3), dtype=int)
     labeled, num_features = label(voxels, structure=structure)
@@ -55,7 +55,14 @@ def connect_components_minimal(voxels):
             voxels[tuple(pt)] = 1
     return voxels
 
-# Step 3: Brick Placement with Gap Filling
+# Step 3: Create Interior Mask for Solid Structure
+def create_interior_mask(voxels):
+    mask = np.copy(voxels)
+    for z in range(mask.shape[2]):
+        mask[:, :, z] = binary_fill_holes(mask[:, :, z])
+    return mask
+
+# Step 4: Brick Placement with Gap Filling
 def optimized_brick_placement_full_integrity(layer_voxels, available_bricks=None):
     if available_bricks is None:
         available_bricks = [(2, 4), (4, 2), (2, 1), (1, 2), (1, 1)]
@@ -86,7 +93,7 @@ def optimized_brick_placement_full_integrity(layer_voxels, available_bricks=None
 
     return brick_plan
 
-# Step 4: Bounding Box
+# Step 5: Bounding Box
 def bounding_box(mask):
     coords = np.argwhere(mask)
     if coords.size == 0:
@@ -95,13 +102,14 @@ def bounding_box(mask):
     max_coords = coords.max(axis=0) + 1
     return tuple(slice(min_, max_) for min_, max_ in zip(min_coords, max_coords))
 
-# Step 5: Process Voxel Layers to Bricks
+# Step 6: Process Voxel Layers
 def process_3d_voxel_fully_connected(voxels, max_layers=30):
     voxels = connect_components_minimal(voxels)
-    z_layers = voxels.shape[2]
+    interior_voxels = create_interior_mask(voxels)
+    z_layers = interior_voxels.shape[2]
     all_bricks = []
     for z in range(min(z_layers, max_layers)):
-        layer = voxels[:, :, z]
+        layer = interior_voxels[:, :, z]
         bbox = bounding_box(layer)
         if bbox is None:
             continue
@@ -112,7 +120,7 @@ def process_3d_voxel_fully_connected(voxels, max_layers=30):
         all_bricks.append({'z': z, 'bricks': brick_plan, 'offset': bbox})
     return all_bricks
 
-# Step 6: Save Brick Plan (.txt)
+# Step 7: Save Brick Plan (.txt)
 def save_brick_plan(brick_layers, output_file):
     with open(output_file, 'w') as f:
         for layer in brick_layers:
@@ -122,7 +130,7 @@ def save_brick_plan(brick_layers, output_file):
             for i, j, bw, bh in layer['bricks']:
                 f.write(f"  Brick at (x={j + x_offset}, y={i + y_offset}, z={z}) size=({bw}x{bh})\n")
 
-# Step 7: Save LDraw Model (.ldr) with Proper Alignment
+# Step 8: Save Aligned LDraw (.ldr)
 def save_ldr_file_vertical_flip_aligned(brick_layers, output_file):
     part_id_map = {
         (1, 1): '3005.dat', (1, 2): '3004.dat', (2, 1): '3004.dat',
@@ -142,3 +150,12 @@ def save_ldr_file_vertical_flip_aligned(brick_layers, output_file):
                 y_pos = -z * brick_height_ldu
                 z_pos = (i + y_offset) * brick_length_ldu
                 f.write(f"1 {color_code} {x_pos} {y_pos} {z_pos} 1 0 0 0 1 0 0 0 1 {part}\n")
+
+# Example Usage
+if __name__ == '__main__':
+    input_obj = "a_colourful_teddy_bear.obj"
+    scaled_path = rescale_obj_uniform(input_obj, "scaled_model.obj")
+    voxels = voxelize_obj_trimesh(scaled_path, pitch=1.0)
+    plan = process_3d_voxel_fully_connected(voxels)
+    save_brick_plan(plan, "lego_plan.txt")
+    save_ldr_file_vertical_flip_aligned(plan, "lego_model.ldr")
