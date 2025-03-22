@@ -1,0 +1,168 @@
+/* App.css */
+.App {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.App-header {
+  background-color: #2c3e50;
+  color: white;
+  padding: 30px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.App-header h1 {
+  margin: 0;
+  font-size: 2.2rem;
+}
+
+.App-header p {
+  margin-top: 10px;
+  font-size: 1.1rem;
+  opacity: 0.8;
+}
+
+.App-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.upload-section {
+  text-align: center;
+  padding: 20px;
+  background-color: #f5f7fa;
+  border-radius: 8px;
+  border: 2px dashed #ccd1d9;
+}
+
+.upload-label {
+  display: inline-block;
+  padding: 12px 24px;
+  background-color: #3498db;
+  color: white;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.upload-label:hover {
+  background-color: #2980b9;
+}
+
+.file-input {
+  display: none;
+}
+
+.image-preview {
+  margin-top: 20px;
+  max-width: 100%;
+}
+
+.image-preview img {
+  max-width: 100%;
+  max-height: 300px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.prompt-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.prompt-section label {
+  font-weight: 600;
+  color: #333;
+}
+
+.prompt-section textarea {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.analyze-button {
+  background-color: #2ecc71;
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.analyze-button:hover:not(:disabled) {
+  background-color: #27ae60;
+}
+
+.analyze-button:disabled {
+  background-color: #95a5a6;
+  cursor: not-allowed;
+}
+
+.error-message {
+  color: #e74c3c;
+  padding: 12px;
+  background-color: #fadbd8;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.result-section {
+  background-color: #f5f7fa;
+  padding: 20px;
+  border-radius: 8px;
+  border-left: 4px solid #2ecc71;
+}
+
+.result-section h2 {
+  color: #2c3e50;
+  margin-top: 0;
+}
+
+.result-text {
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 600px) {
+  .App {
+    padding: 10px;
+  }
+
+  .App-header {
+    padding: 20px;
+  }
+
+  .App-header h1 {
+    font-size: 1.8rem;
+  }
+
+  .analyze-button {
+    padding: 12px;
+  }
+}
+.error-container {
+  margin: 20px 0;
+  padding: 12px;
+  border: 1px solid #f5c2c7;
+  border-radius: 4px;
+  background-color: #f8d7da;
+}
+
+.error-message {
+  color: #842029;
+  font-weight: 500;
+}
