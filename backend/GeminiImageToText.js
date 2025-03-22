@@ -2,6 +2,7 @@
 require('dotenv').config();
 const fs = require('fs');
 const axios = require('axios');
+const path = require('path');
 
 class GeminiImageToText {
     constructor() {
@@ -14,6 +15,24 @@ class GeminiImageToText {
         this.modelName = "gemini-1.5-pro";
         this.imagePart = null;
         this.prompt = null;
+
+        // Load the prompt from file during initialization
+        this.loadPromptFromFile();
+    }
+
+    loadPromptFromFile() {
+        const promptPath = path.join(__dirname, '..', 'backend', 'prompt', 'geminiPrompt.txt');
+
+        if (!fs.existsSync(promptPath)) {
+            throw new Error(`Prompt file not found at: ${promptPath}`);
+        }
+
+        try {
+            this.prompt = fs.readFileSync(promptPath, 'utf8');
+            console.log("Prompt loaded successfully");
+        } catch (error) {
+            throw new Error(`Failed to load prompt: ${error.message}`);
+        }
     }
 
     attachImage(imagePath) {
@@ -37,26 +56,13 @@ class GeminiImageToText {
         }
     }
 
-    setPrompt(promptPath) {
-        if (!fs.existsSync(promptPath)) {
-            throw new Error(`Prompt file not found: ${promptPath}`);
-        }
-
-        try {
-            this.prompt = fs.readFileSync(promptPath, 'utf8');
-            return "Prompt set successfully";
-        } catch (error) {
-            throw new Error(`Failed to set prompt: ${error.message}`);
-        }
-    }
-
     async predict() {
         if (!this.imagePart) {
             throw new Error("No image attached. Please attach an image first.");
         }
 
         if (!this.prompt) {
-            throw new Error("No prompt set. Please set a prompt first.");
+            throw new Error("No prompt loaded. There might be an issue with the prompt file.");
         }
 
         try {

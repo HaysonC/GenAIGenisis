@@ -1,0 +1,7 @@
+Describe what you see in this image in detail.
+This is a picture that will be used to generate a 3d model.
+Please be precise on the main features of the image, while omitting any irrelevant details.
+
+Your response should guide another model to generate a 3d model of the image.
+
+Give procedural instructions on what is the primary focus and priority of the image.
