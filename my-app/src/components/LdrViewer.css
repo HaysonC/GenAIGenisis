@@ -829,4 +829,186 @@ input[type="file"] {
   .view-control-button {
     min-width: 100%;
   }
+}
+
+/* Layer Instructions Styling */
+.instructions-header {
+  background-color: #f5c518;
+  padding: 1.5rem;
+  border-radius: 8px 8px 0 0;
+  margin-bottom: 1rem;
+  text-align: center;
+  border-bottom: 5px solid #d01012;
+}
+
+.instructions-header h2 {
+  color: #d01012;
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.instructions-header p {
+  color: #05131d;
+  font-size: 1.1rem;
+}
+
+.layer-instructions-controls {
+  background-color: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.layer-instructions-controls h3 {
+  font-size: 1.4rem;
+  margin-bottom: 1rem;
+  color: #d01012;
+}
+
+.layer-navigation {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.layer-navigation button {
+  background-color: #0d69ab;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.layer-navigation button:hover {
+  background-color: #0b5a95;
+}
+
+.layer-navigation button:disabled {
+  background-color: #a3a2a4;
+  cursor: not-allowed;
+}
+
+.layer-navigation button span {
+  font-size: 1.2rem;
+}
+
+.layer-progress {
+  background-color: #e3e3e3;
+  height: 10px;
+  border-radius: 5px;
+  width: 200px;
+  overflow: hidden;
+}
+
+.layer-progress-bar {
+  background-color: #d01012;
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.next-step-button {
+  background-color: #00852b;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 0.75rem 2rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.next-step-button:hover {
+  background-color: #007025;
+}
+
+.completion-message {
+  color: #00852b;
+  font-size: 1.2rem;
+  font-weight: bold;
+  padding: 0.75rem;
+  background-color: #f0fff0;
+  border-radius: 20px;
+  border: 1px solid #00852b;
+}
+
+.parts-for-step {
+  background-color: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.parts-for-step h4 {
+  color: #05131d;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+
+.step-parts-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.part-item {
+  display: flex;
+  align-items: center;
+  background-color: #f8f9fa;
+  padding: 0.75rem;
+  border-radius: 6px;
+  border: 1px solid #e5e5e5;
+}
+
+.part-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  margin-right: 0.75rem;
+}
+
+.part-name {
+  font-weight: bold;
+  margin-right: 0.5rem;
+}
+
+.part-count {
+  color: #666;
+}
+
+/* Responsive adjustments for layer instructions */
+@media (max-width: 768px) {
+  .layer-instructions-controls {
+    padding: 1rem;
+  }
+
+  .layer-navigation {
+    gap: 0.5rem;
+  }
+
+  .layer-navigation button {
+    width: 36px;
+    height: 36px;
+  }
+
+  .layer-progress {
+    width: 150px;
+  }
+
+  .step-parts-list {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
 } 

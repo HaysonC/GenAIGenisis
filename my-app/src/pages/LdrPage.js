@@ -225,6 +225,7 @@ const LdrPage = () => {
               modelUrl={location.state?.modelUrl} 
               modelId={modelId}
               apiBaseUrl={API_BASE_URL}
+              showInstructions={location.state?.showInstructions}
             />
           </div>
         </>

@@ -589,6 +589,140 @@ body {
   cursor: not-allowed;
 }
 
+/* Mode Selection */
+.mode-selection {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.mode-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--card-background);
+  border: 2px solid var(--border-color);
+  border-radius: 30px;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  gap: 0.5rem;
+  min-width: 160px;
+}
+
+.mode-button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.mode-button.active {
+  background-color: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.mode-button svg {
+  font-size: 1.25rem;
+}
+
+/* Mode Instructions */
+.mode-instructions {
+  background-color: var(--card-background);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.mode-instructions h3 {
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+}
+
+.mode-instructions ol {
+  padding-left: 1.5rem;
+}
+
+.mode-instructions li {
+  margin-bottom: 0.5rem;
+}
+
+/* Text Input Container */
+.text-input-container {
+  max-width: 800px;
+  margin: 0 auto 2rem;
+  background-color: var(--card-background);
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
+  padding: 2rem;
+}
+
+.text-prompt-input {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius);
+  margin-bottom: 1.5rem;
+  resize: vertical;
+  min-height: 150px;
+  transition: border-color 0.3s;
+}
+
+.text-prompt-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.text-prompt-input::placeholder {
+  color: #aaa;
+}
+
+.text-input-container .generate-button {
+  display: block;
+  margin: 0 auto;
+}
+
+/* LDR File Preview */
+.ldr-file-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #f9f9f9;
+  padding: 2rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-color);
+}
+
+.ldr-file-preview .file-name {
+  margin-top: 1rem;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+/* Upload area additional styles for drag and drop */
+.upload-area.dragging {
+  border-color: var(--primary-color);
+  background-color: #fff9f9;
+  box-shadow: 0 0 0 2px var(--primary-color);
+}
+
+.drop-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .App-header {
@@ -635,6 +769,25 @@ body {
 
   .cancel-button, .upload-button {
     width: 100%;
+  }
+
+  .mode-selection {
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: center;
+  }
+  
+  .mode-button {
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .text-input-container {
+    padding: 1.5rem;
+  }
+  
+  .text-prompt-input {
+    min-height: 100px;
   }
 }
 

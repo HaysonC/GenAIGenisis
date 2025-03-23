@@ -223,13 +223,15 @@ const brickGeometryCache = new Map();
  * @param {string} props.modelUrl - URL to the 3D model (OBJ) to display as a fallback
  * @param {string} props.modelId - ID of the model
  * @param {string} props.apiBaseUrl - Base URL for API requests
+ * @param {boolean} props.showInstructions - Flag to enable layer-by-layer instructions mode
  * @returns {JSX.Element} - The rendered component
  */
 const LdrViewer = ({ 
   ldrFile, 
   modelUrl, 
   modelId = '', 
-  apiBaseUrl = 'http://localhost:5001' 
+  apiBaseUrl = 'http://localhost:5001',
+  showInstructions = false
 }) => {
   const containerRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -264,6 +266,9 @@ const LdrViewer = ({
   const [showStats, setShowStats] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [autoRotate, setAutoRotate] = useState(false);
+  const [showLayerControls, setShowLayerControls] = useState(false);
+  const [currentLayer, setCurrentLayer] = useState(1);
+  const [totalLayers, setTotalLayers] = useState(0);
 
   // Handle the file being dropped or uploaded
   useEffect(() => {
@@ -740,13 +745,13 @@ const LdrViewer = ({
       // Calculate how many layers would fit in this Y range if each layer is one brick height
       const possibleLayerCount = Math.ceil(yRange / brickHeight);
       
-      // Use a reasonable number of layers (between 1 and 15)
-      const targetLayerCount = Math.min(15, Math.max(1, possibleLayerCount));
+      // Use a reasonable number of layers (between 1 and 50)
+      const targetLayerCount = Math.min(50, Math.max(1, possibleLayerCount));
       
       // Calculate the thickness of each layer based on the total Y range
       const layerThickness = yRange / targetLayerCount;
       
-      console.log(`Min Y: ${minY}, Max Y: ${maxY}, Range: ${yRange}, Possible Layers: ${possibleLayerCount}, Target Layers: ${targetLayerCount}`);
+      console.log(`Min Y: ${minY}, Max Y: ${maxY}, Range: ${yRange}, Possible Layers: ${possibleLayerCount}, Target Layers: ${targetLayerCount} (max: 50)`);
       
       // Distribute parts into layers (from bottom to top)
       allParts.forEach(part => {
@@ -1080,8 +1085,15 @@ const LdrViewer = ({
       };
       
       reader.readAsText(ldrFile);
+    } else if (modelUrl) {
+      // Handle the case when only a 3D model URL is provided
+      setViewMode('model');
+      setLoading(true);
+      
+      // No layer-by-layer view for direct model URLs
+      setShowLayerControls(false);
     }
-  }, [ldrFile]);
+  }, [ldrFile, modelUrl]);
 
   // Add effect to handle modelUrl for direct 3D model display when LDR is not available
   useEffect(() => {
@@ -1208,6 +1220,14 @@ const LdrViewer = ({
 
   return (
     <div className="ldr-viewer">
+      {/* Include layer instructions UI if in instructions mode */}
+      {showInstructions && (
+        <div className="instructions-header">
+          <h2>LEGO Build Instructions</h2>
+          <p>Follow these step-by-step instructions to build your LEGO model</p>
+        </div>
+      )}
+
       <div className="ldr-viewer-header">
         <h2>LDR Viewer</h2>
         
@@ -1310,6 +1330,86 @@ const LdrViewer = ({
                 )}
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      <div className="viewer-controls">
+        {/* Show prominent layer controls when in instructions mode */}
+        {showInstructions && showLayerControls && (
+          <div className="layer-instructions-controls">
+            <h3>Step {currentLayer} of {totalLayers}</h3>
+            <div className="layer-navigation">
+              <button 
+                onClick={() => setCurrentLayer(1)}
+                disabled={currentLayer === 1}
+                title="First Step"
+              >
+                <span>⏮</span>
+              </button>
+              <button 
+                onClick={() => setCurrentLayer(prev => Math.max(1, prev - 1))}
+                disabled={currentLayer === 1}
+                title="Previous Step"
+              >
+                <span>◀</span>
+              </button>
+              <div className="layer-progress">
+                <div 
+                  className="layer-progress-bar" 
+                  style={{ width: `${(currentLayer / totalLayers) * 100}%` }}
+                ></div>
+              </div>
+              <button 
+                onClick={() => setCurrentLayer(prev => Math.min(totalLayers, prev + 1))}
+                disabled={currentLayer === totalLayers}
+                title="Next Step"
+              >
+                <span>▶</span>
+              </button>
+              <button 
+                onClick={() => setCurrentLayer(totalLayers)}
+                disabled={currentLayer === totalLayers}
+                title="Last Step"
+              >
+                <span>⏭</span>
+              </button>
+            </div>
+            {currentLayer < totalLayers && (
+              <button 
+                className="next-step-button"
+                onClick={() => setCurrentLayer(prev => Math.min(totalLayers, prev + 1))}
+              >
+                Next Step
+              </button>
+            )}
+            {currentLayer === totalLayers && (
+              <div className="completion-message">
+                Build complete! 🎉
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ... existing controls ... */}
+      </div>
+
+      {showInstructions && currentLayer < totalLayers && (
+        <div className="parts-for-step">
+          <h4>Parts needed for this step:</h4>
+          <div className="step-parts-list">
+            {/* This would ideally come from a backend endpoint that extracts parts for each layer */}
+            {/* For now we'll include a simple placeholder */}
+            <div className="part-item">
+              <div className="part-color" style={{ backgroundColor: '#D01012' }}></div>
+              <span className="part-name">2x4 Brick</span>
+              <span className="part-count">× 2</span>
+            </div>
+            <div className="part-item">
+              <div className="part-color" style={{ backgroundColor: '#F5C518' }}></div>
+              <span className="part-name">2x2 Plate</span>
+              <span className="part-count">× 4</span>
+            </div>
           </div>
         </div>
       )}

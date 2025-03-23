@@ -13,7 +13,9 @@ import {
   FaInfoCircle,
   FaImage,
   FaUpload,
-  FaSpinner
+  FaSpinner,
+  FaKeyboard,
+  FaFileImport
 } from "react-icons/fa"
 
 /**
@@ -46,6 +48,11 @@ function App() {
   const [modelId, setModelId] = useState("")
   const [ldrUrl, setLdrUrl] = useState("")
   const [ldrFilePath, setLdrFilePath] = useState("")
+  
+  // New state for input modes
+  const [inputMode, setInputMode] = useState("image") // image, text, ldr
+  const [textPrompt, setTextPrompt] = useState("")
+  const [showTextInput, setShowTextInput] = useState(false)
 
   // Refs
   const bricksRef = useRef(null)
@@ -130,6 +137,161 @@ function App() {
       setSelectedFile(file)
       setPreviewUrl(URL.createObjectURL(file))
       setError("")
+    }
+  }
+
+  /**
+   * Handle text prompt change
+   * @param {Event} e - Event object
+   */
+  const handleTextChange = (e) => {
+    setTextPrompt(e.target.value);
+    setError("");
+  }
+
+  /**
+   * Handle text prompt submission
+   */
+  const handleTextSubmit = async () => {
+    if (!textPrompt.trim()) {
+      setError("Please enter a text prompt");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    setProgress(20);
+    setProgressMessage("Generating 3D model from text...");
+    addDebugLog("Starting text-to-model generation", {
+      prompt: textPrompt
+    });
+
+    try {
+      // Submit the text prompt to generate a model
+      const generateResponse = await axios.post(
+        `${API_BASE_URL}/generate-model-from-text`,
+        { prompt: textPrompt }
+      );
+
+      addDebugLog("Model generation response", generateResponse.data);
+
+      if (!generateResponse.data) {
+        throw new Error("Failed to generate model: Invalid server response");
+      }
+
+      setProgress(60);
+      setProgressMessage("Converting 3D model to LDR format...");
+
+      // Set the model information
+      setModelUrl(generateResponse.data.filePath);
+      setModelId(generateResponse.data.filename);
+
+      // Check if LDR conversion was included
+      if (generateResponse.data.ldrFilePath) {
+        setLdrUrl(generateResponse.data.ldrFilePath);
+        setLdrFilePath(generateResponse.data.ldrFilePath);
+        addDebugLog("LDR conversion successful", {
+          ldrFilePath: generateResponse.data.ldrFilePath
+        });
+
+        setProgress(100);
+        setProgressMessage("Complete!");
+
+        // Navigate to the LDR viewer page
+        navigate('/ldr-viewer', { 
+          state: { 
+            ldrFilePath: generateResponse.data.ldrFilePath,
+            modelUrl: generateResponse.data.filePath,
+            description: textPrompt // Using the prompt as the description
+          } 
+        });
+        
+        addDebugLog("Navigating to LDR viewer page", {
+          ldrFilePath: generateResponse.data.ldrFilePath
+        });
+      } else if (generateResponse.data.ldrConversionError) {
+        addDebugLog("LDR conversion failed", {
+          error: generateResponse.data.ldrConversionError,
+        });
+        
+        throw new Error(`LDR conversion failed: ${generateResponse.data.ldrConversionError}`);
+      }
+
+    } catch (err) {
+      console.error("Error in text-to-model pipeline:", err);
+      const errorMessage = err.response?.data?.message || err.message || "An error occurred during processing";
+      setError(errorMessage);
+      addDebugLog("Error in text-to-model pipeline", {
+        message: errorMessage,
+        response: err.response?.data,
+        status: err.response?.status,
+      });
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  /**
+   * Handle LDR file upload and processing
+   */
+  const handleLdrFileUpload = async () => {
+    if (!selectedFile) {
+      setError("Please select an LDR file first");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    setProgress(20);
+    setProgressMessage("Processing LDR file...");
+    addDebugLog("Starting LDR file processing", {
+      fileName: selectedFile.name,
+      fileSize: selectedFile.size,
+    });
+
+    try {
+      // Create form data for file upload
+      const formData = new FormData();
+      formData.append("ldrFile", selectedFile);
+      
+      // Upload the LDR file
+      const uploadResponse = await axios.post(
+        `${API_BASE_URL}/upload-ldr-for-parts`,
+        formData
+      );
+      
+      addDebugLog("LDR file upload response", uploadResponse.data);
+      
+      if (!uploadResponse.data || !uploadResponse.data.filePath) {
+        throw new Error("Failed to upload LDR file: Invalid server response");
+      }
+      
+      setProgress(100);
+      setProgressMessage("Complete!");
+      
+      // Navigate to the LDR viewer page
+      navigate('/ldr-viewer', { 
+        state: { 
+          ldrFilePath: uploadResponse.data.filePath,
+          showInstructions: true // Flag to show layer-by-layer instructions
+        } 
+      });
+      
+      addDebugLog("Navigating to LDR viewer page with LDR file", {
+        ldrFilePath: uploadResponse.data.filePath
+      });
+      
+    } catch (err) {
+      console.error("Error in LDR processing pipeline:", err);
+      const errorMessage = err.response?.data?.message || err.message || "An error occurred during processing";
+      setError(errorMessage);
+      addDebugLog("Error in LDR processing pipeline", {
+        message: errorMessage,
+        response: err.response?.data,
+        status: err.response?.status,
+      });
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -328,7 +490,7 @@ function App() {
     <div className="App">
       <header className="App-header">
         <h1>LEGOFIKS</h1>
-        <p>Upload an image to create your own 3D LEGO model!</p>
+        <p>Upload an image, enter text, or upload an LDR file to build your own 3D LEGO model!</p>
         <button
           className={`debug-toggle ${debugMode ? "active" : ""}`}
           onClick={toggleDebugMode}
@@ -340,41 +502,142 @@ function App() {
 
       <main className="App-content">
         {currentStep === "upload" && !loading && (
-          <div className="upload-container">
-            <div className="upload-card" onClick={() => setIsModalOpen(true)}>
-              <FaImage className="upload-icon" />
-              <h2>Start Building!</h2>
-              <p>Click here to upload an image</p>
-              <div className="format-info">
-                <FaInfoCircle />
-                <span>Acceptable formats: PNG, JPG</span>
+          <>
+            <div className="mode-selection">
+              <button 
+                className={`mode-button ${inputMode === "image" ? "active" : ""}`}
+                onClick={() => {
+                  setInputMode("image");
+                  setShowTextInput(false);
+                  setError("");
+                }}
+              >
+                <FaImage /> Image Mode
+              </button>
+              <button 
+                className={`mode-button ${inputMode === "text" ? "active" : ""}`}
+                onClick={() => {
+                  setInputMode("text");
+                  setShowTextInput(true);
+                  setError("");
+                }}
+              >
+                <FaKeyboard /> Text Mode
+              </button>
+              <button 
+                className={`mode-button ${inputMode === "ldr" ? "active" : ""}`}
+                onClick={() => {
+                  setInputMode("ldr");
+                  setShowTextInput(false);
+                  setError("");
+                }}
+              >
+                <FaFileImport /> LDR File Mode
+              </button>
+            </div>
+
+            {/* Instructions for selected mode */}
+            <div className="mode-instructions">
+              <h3>How to Use {inputMode === "image" ? "Image" : inputMode === "text" ? "Text" : "LDR File"} Mode:</h3>
+              {inputMode === "image" && (
+                <ol>
+                  <li>Click the box below to upload a PNG or JPG image</li>
+                  <li>After uploading, click the "Build 3D Model" button</li>
+                  <li>Wait while the computer creates your 3D model</li>
+                  <li>View and interact with your 3D LEGO model</li>
+                  <li>Use the "Modify LEGO Model" button to make changes</li>
+                </ol>
+              )}
+              {inputMode === "text" && (
+                <ol>
+                  <li>Enter a detailed description of what you want to build</li>
+                  <li>Click the "Generate 3D Model" button</li>
+                  <li>Wait while the AI creates your 3D model directly from text</li>
+                  <li>View and interact with your 3D LEGO model</li>
+                </ol>
+              )}
+              {inputMode === "ldr" && (
+                <ol>
+                  <li>Click the box below to upload an LDR file (.ldr, .mpd, or .dat)</li>
+                  <li>After uploading, click the "View LDR Model" button</li>
+                  <li>The LDR viewer will display your model with layer-by-layer instructions</li>
+                </ol>
+              )}
+            </div>
+
+            {/* Display text input for text mode */}
+            {inputMode === "text" && showTextInput && (
+              <div className="text-input-container">
+                <textarea 
+                  className="text-prompt-input"
+                  placeholder="Describe what you want to build with LEGO bricks... (e.g., A small red house with a blue roof and windows)"
+                  value={textPrompt}
+                  onChange={handleTextChange}
+                  rows={5}
+                />
+                <button 
+                  className="generate-button"
+                  onClick={handleTextSubmit}
+                  disabled={!textPrompt.trim()}
+                >
+                  <FaCube /> Generate 3D Model
+                </button>
               </div>
-            </div>
-            <div className="instructions-panel">
-              <h3>How It Works:</h3>
-              <ol>
-                <li>Upload an image of an object</li>
-                <li>The AI will analyze your image</li>
-                <li>A 3D model will be created based on your image</li>
-                <li>The model will be converted to LEGO bricks</li>
-                <li>View and interact with your LEGO creation</li>
-              </ol>
-            </div>
-          </div>
+            )}
+
+            {/* Upload card for image or LDR file modes */}
+            {(inputMode === "image" || inputMode === "ldr") && (
+              <div className="upload-container">
+                <div className="upload-card" onClick={() => setIsModalOpen(true)}>
+                  {inputMode === "image" ? (
+                    <>
+                      <FaImage className="upload-icon" />
+                      <h2>Start Building!</h2>
+                      <p>Click here to upload an image</p>
+                      <div className="format-info">
+                        <FaInfoCircle />
+                        <span>Acceptable formats: PNG, JPG</span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <FaFileImport className="upload-icon" />
+                      <h2>Upload LDR File</h2>
+                      <p>Click here to upload a LEGO Digital Designer file</p>
+                      <div className="format-info">
+                        <FaInfoCircle />
+                        <span>Acceptable formats: LDR, MPD, DAT</span>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+          </>
         )}
 
         {previewUrl && currentStep === "upload" && !loading && (
           <div className="image-section">
-            <h2>Your Image</h2>
+            <h2>Your {inputMode === "ldr" ? "LDR File" : "Image"}</h2>
             <div className="image-preview">
-              <img src={previewUrl} alt="Your uploaded image" />
+              {inputMode !== "ldr" ? (
+                <img src={previewUrl} alt="Your uploaded image" />
+              ) : (
+                <div className="ldr-file-preview">
+                  <FaFileImport style={{ fontSize: "4rem", color: "#D01012" }} />
+                  <p className="file-name">{selectedFile?.name}</p>
+                </div>
+              )}
             </div>
             <div className="image-info">
               <p>File name: {selectedFile?.name}</p>
-              <p>File type: {selectedFile?.type}</p>
+              <p>File type: {selectedFile?.type || "LDR file"}</p>
             </div>
-            <button className="process-button" onClick={handleUploadImage}>
-              <FaCube /> Build LEGO Model
+            <button 
+              className="process-button" 
+              onClick={inputMode === "ldr" ? handleLdrFileUpload : handleUploadImage}
+            >
+              <FaCube /> {inputMode === "ldr" ? "View LDR Model" : "Build LEGO Model"}
             </button>
           </div>
         )}
@@ -412,9 +675,9 @@ function App() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onFileChange={handleFileChange}
-        onUpload={handleUploadImage}
+        onUpload={inputMode === "ldr" ? handleLdrFileUpload : handleUploadImage}
         selectedFile={selectedFile}
-        inputMode="image"
+        inputMode={inputMode}
       />
     </div>
   )
