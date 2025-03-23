@@ -127,12 +127,13 @@ class GeminiImageToText {
     }
   }
 
-  async predict(promptType = "default") {
+  async predict(promptType = "default", customPrompt = null) {
     if (this.imageParts.length === 0) {
       throw new Error("No images attached. Please attach at least one image first.")
     }
 
-    const promptText = this.prompts[promptType]
+    // Use the custom prompt if provided, otherwise use the loaded prompt
+    const promptText = customPrompt || this.prompts[promptType]
     if (!promptText) {
       throw new Error(`No prompt loaded for type: ${promptType}`)
     }
@@ -174,38 +175,67 @@ class GeminiImageToText {
     }
   }
 
-  async generateInstructions(viewPaths) {
-    if (!Array.isArray(viewPaths) || viewPaths.length === 0) {
-      throw new Error("No view paths provided")
-    }
-
-    // Attach all the view images
+  async generateInstructions(viewPaths, originalDescription = "") {
     try {
-      await this.attachImages(viewPaths)
+      console.log("Generating instructions from views...")
+
+      // Validate input
+      if (!viewPaths || !Array.isArray(viewPaths) || viewPaths.length === 0) {
+        throw new Error("No view paths provided for instruction generation")
+      }
+
+      // Attach all the view images
+      try {
+        await this.attachImages(viewPaths)
+        console.log(`Successfully attached ${viewPaths.length} view images`)
+      } catch (error) {
+        console.error("Error attaching images:", error)
+        throw new Error(`Failed to attach images: ${error.message}`)
+      }
+
+      // Prepare the results object
+      const results = {}
+
+      // Store the original description
+      results.original = originalDescription || ""
+      console.log(`Using original description: "${results.original}"`)
+
+      // Generate instructions using different prompts with the original description
+      try {
+        // Engineering instructions - include original description in the prompt
+        const engineeringPrompt = this.prompts.engineering || ""
+        const enhancedEngineeringPrompt = originalDescription
+          ? `The following is a description of the object: "${originalDescription}"\n\n${engineeringPrompt}`
+          : engineeringPrompt
+
+        results.engineering = await this.predict("engineering", enhancedEngineeringPrompt)
+        console.log("Generated engineering instructions")
+
+        // Building instructions - include original description in the prompt
+        const buildingPrompt = this.prompts.building || ""
+        const enhancedBuildingPrompt = originalDescription
+          ? `The following is a description of the object: "${originalDescription}"\n\n${buildingPrompt}`
+          : buildingPrompt
+
+        results.building = await this.predict("building", enhancedBuildingPrompt)
+        console.log("Generated building instructions")
+
+        // Style/supplier instructions - include original description in the prompt
+        const stylePrompt = this.prompts.style || ""
+        const enhancedStylePrompt = originalDescription
+          ? `The following is a description of the object: "${originalDescription}"\n\n${stylePrompt}`
+          : stylePrompt
+
+        results.style = await this.predict("style", enhancedStylePrompt)
+        console.log("Generated style/supplier instructions")
+
+        return results
+      } catch (error) {
+        console.error("Error generating instructions:", error)
+        throw new Error(`Failed to generate instructions: ${error.message}`)
+      }
     } catch (error) {
-      console.error("Error attaching images:", error)
-      throw new Error(`Failed to attach images: ${error.message}`)
-    }
-
-    // Generate instructions using different prompts
-    const results = {}
-
-    try {
-      // Engineering instructions
-      results.engineering = await this.predict("engineering")
-      console.log("Generated engineering instructions")
-
-      // Building instructions
-      results.building = await this.predict("building")
-      console.log("Generated building instructions")
-
-      // Style instructions
-      results.style = await this.predict("style")
-      console.log("Generated style instructions")
-
-      return results
-    } catch (error) {
-      console.error("Error generating instructions:", error)
+      console.error("Error in generateInstructions:", error)
       throw new Error(`Failed to generate instructions: ${error.message}`)
     }
   }

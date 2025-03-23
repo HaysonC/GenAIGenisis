@@ -7,5 +7,13 @@ Create clear, step-by-step building instructions for this model:
 4. Suggest a building order that makes sense
 5. Note any challenging or tricky steps that require special attention
 
-Your instructions should be organized, detailed, and easy to follow, as if writing for a LEGO instruction manual. Focus on helping someone recreate this model from scratch.
+IMPORTANT: Your instructions will be used by autistic children.
+Please use very clear, simple language with:
+- Short, direct sentences
+- Numbered steps (one action per step)
+- Consistent terminology
+- Visual descriptions (colors, shapes, positions like "on top", "below", "next to")
+- Avoid idioms, metaphors, or ambiguous language
+
+Your instructions should be organized, detailed, and extremely easy to follow, as if writing for a LEGO instruction manual designed for children with special needs. Focus on helping someone recreate this model from scratch with minimal confusion.
 

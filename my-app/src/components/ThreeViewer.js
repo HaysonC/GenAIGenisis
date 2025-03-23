@@ -157,9 +157,14 @@ const ThreeViewer = ({ modelUrl }) => {
       console.log(`Loading model: ${progress.toFixed(2)}% loaded`)
     }
 
-    loader.setManager(loadingManager)
+    // This line is causing the error - loader.setManager is not a function
+    // loader.setManager(loadingManager)
 
-    loader.load(
+    // Instead, create a new GLTFLoader with the loadingManager
+    const gltfLoader = new GLTFLoader(loadingManager)
+    gltfLoader.setDRACOLoader(dracoLoader)
+
+    gltfLoader.load(
       modelUrl,
       (gltf) => {
         const model = gltf.scene

@@ -5,3 +5,5 @@ Be concise about the main subject of the image. Ignore background details.
 Describe the color, texture, and shape of the main subject.
 
 Keep it under 20 words.
+
+

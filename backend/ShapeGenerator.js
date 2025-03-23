@@ -8,7 +8,7 @@ class ShapeGenerator {
   constructor() {
     // Get API endpoint from environment variables or use default
     this.apiEndpoint =
-      process.env.SHAPE_API_URL || "https://moulik-budhiraja--shape-text-to-3d-a100-40gb-generate.modal.run"
+      process.env.SHAPE_API_URL
 
     // Set up models directory
     this.modelsDir = path.join(__dirname, "models")
@@ -57,7 +57,7 @@ class ShapeGenerator {
     // Generate a safe filename based on the prompt
     const safePrompt = prompt.replace(/[^a-zA-Z0-9]/g, "_").substring(0, 30)
     const timestamp = Date.now()
-    const filename = `${safePrompt}_${timestamp}.stl`
+    const filename = `${safePrompt}_${timestamp}.obj`
     const filePath = path.join(this.modelsDir, filename)
 
     try {

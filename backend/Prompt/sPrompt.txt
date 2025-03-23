@@ -7,4 +7,13 @@ Provide a detailed supplier analysis of this LEGO model, focusing on:
 4. Estimated cost to source all parts for this model
 5. Recommendations for the most cost-effective ways to acquire these parts (BrickLink, LEGO Pick-a-Brick, etc.)
 
-Your analysis should be practical and helpful for someone trying to source all the parts to build this model. Include specific part numbers where you can identify them, and note any parts that might be particularly expensive or difficult to find.
+IMPORTANT: Your analysis will be used to help teachers and parents of autistic children.
+Please use clear, simple language and organize information in a structured way:
+- Use bullet points and lists where appropriate
+- Clearly separate different categories of information
+- Use consistent terminology
+- Explain any technical terms you must use
+- Focus on practical, actionable information
+
+Your analysis should be practical and helpful for someone trying to source all the parts to build this model for use in educational settings for children with special needs. Include specific part numbers where you can identify them, and note any parts that might be particularly expensive or difficult to find.
+

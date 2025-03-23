@@ -179,16 +179,22 @@ body {
   text-shadow: 1px 1px 0 var(--lego-yellow);
 }
 
+/* Ensure the image preview maintains consistent height */
 .image-preview {
   width: 100%;
+  min-height: 300px;
   border-radius: var(--radius);
   overflow: hidden;
   border: 4px solid var(--lego-yellow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .image-preview img {
   width: 100%;
   height: auto;
+  max-height: 300px;
   object-fit: contain;
 }
 
@@ -289,6 +295,7 @@ body {
   background-image: linear-gradient(rgba(255, 255, 255, 0.5) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.5) 1px, transparent 1px);
   background-size: 20px 20px;
+  background-position: 0 0, 10px 10px;
 }
 
 .message {
@@ -1139,6 +1146,23 @@ body {
   line-height: 1.5;
 }
 
+/* Improve the instructions note styling */
+.instructions-note {
+  background-color: #e8f5e9;
+  border-left: 4px solid var(--lego-green);
+  padding: 12px 15px;
+  margin-bottom: 15px;
+  font-style: italic;
+  border-radius: 4px;
+  line-height: 1.5;
+}
+
+.high-contrast .instructions-note {
+  background-color: #ffffff;
+  border-left: 4px solid #00cc00;
+  color: #000000;
+}
+
 /* File information */
 .image-info {
   margin-top: 1rem;
@@ -1435,27 +1459,34 @@ body {
 }
 
 .ldr-views-container {
-  width: 100%;
-  margin-top: 1rem;
+  margin-top: 1.5rem;
+}
+
+.ldr-views-container h3 {
+  font-family: "Fredoka One", cursive;
+  color: var(--lego-red);
+  margin-bottom: 0.75rem;
+  font-size: 1.5rem;
 }
 
 .ldr-views-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;
-  margin-top: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
 }
 
 .ldr-view-item {
-  border: 3px solid var(--lego-yellow);
+  border: 4px solid var(--lego-yellow);
   border-radius: var(--radius);
   overflow: hidden;
   background-color: white;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: var(--shadow-sm);
 }
 
 .ldr-view-item:hover {
-  transform: translateY(-5px);
+  transform: translateY(-5px) rotate(1deg);
   box-shadow: var(--shadow-md);
 }
 
@@ -1465,15 +1496,18 @@ body {
   object-fit: contain;
   background-color: white;
   display: block;
+  padding: 10px;
 }
 
 .ldr-view-caption {
-  padding: 0.5rem;
+  padding: 0.75rem;
   text-align: center;
   font-weight: bold;
-  background-color: var(--lego-light-gray);
+  background-color: var(--lego-yellow);
   color: var(--lego-black);
   text-transform: capitalize;
+  font-family: "Fredoka One", cursive;
+  font-size: 0.9rem;
 }
 
 .ldr-model-section {
@@ -1752,5 +1786,477 @@ body {
 
 .high-contrast .debug-log-data {
   border: 1px solid #000000;
+}
+
+/* Add these styles for the LDR viewer */
+.ldr-viewer-container {
+  width: 100%;
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-top: 1rem;
+  border: 4px solid var(--lego-yellow);
+  background-color: white;
+}
+
+.ldr-viewer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: var(--lego-blue);
+  color: white;
+}
+
+.ldr-viewer-header h3 {
+  font-family: "Fredoka One", cursive;
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.ldr-viewer-content {
+  padding: 1rem;
+  min-height: 200px;
+}
+
+.ldr-viewer-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  background-color: var(--lego-light-gray);
+  border-radius: var(--radius);
+  text-align: center;
+  padding: 1rem;
+}
+
+.ldr-placeholder-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.ldr-placeholder-icon {
+  font-size: 3rem;
+  color: var(--lego-red);
+}
+
+.ldr-file-path {
+  font-family: monospace;
+  background-color: #f0f0f0;
+  padding: 0.5rem;
+  border-radius: 4px;
+  margin-top: 1rem;
+  word-break: break-all;
+}
+
+/* Add these new styles for the side-by-side text input layout */
+.text-input-flex {
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+  width: 100%;
+}
+
+.text-input-card {
+  background-color: var(--lego-yellow);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  padding: 2rem;
+  text-align: center;
+  width: 100%;
+  max-width: 600px;
+  position: relative;
+  border: 8px solid var(--lego-red);
+  overflow: hidden;
+  flex: 1;
+}
+
+.text-input-container .instructions-panel {
+  flex: 1;
+  margin-top: 0;
+}
+
+@media (max-width: 992px) {
+  .text-input-flex {
+    flex-direction: column;
+  }
+
+  .text-input-card,
+  .text-input-container .instructions-panel {
+    max-width: 100%;
+  }
+}
+
+/* Add these new styles for the results tabs and content */
+.results-tabs {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 10px;
+  gap: 10px;
+}
+
+.tab-button {
+  padding: 12px 24px;
+  margin: 0 5px;
+  background-color: #f0f0f0;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tab-button.active {
+  background-color: var(--lego-red);
+  color: white;
+  transform: translateY(-3px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.tab-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+.tab-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tab-button svg {
+  font-size: 18px;
+}
+
+/* Improve the model section styling */
+.model-section,
+.instructions-section,
+.parts-section {
+  background-color: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  border: 6px solid var(--lego-red);
+  position: relative;
+}
+
+.model-section::after,
+.instructions-section::after,
+.parts-section::after {
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  height: 8px;
+  border-radius: 4px;
+  background-color: var(--lego-yellow);
+}
+
+.model-section h2,
+.instructions-section h2,
+.parts-section h2 {
+  font-family: "Fredoka One", cursive;
+  margin-bottom: 1.5rem;
+  margin-top: 0.5rem;
+  font-size: 2rem;
+  color: var(--lego-red);
+  text-shadow: 1px 1px 0 var(--lego-yellow);
+}
+
+/* Improve the model viewer styling */
+.model-viewer {
+  width: 100%;
+  height: 450px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  border: 4px solid var(--lego-yellow);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Improve the model actions styling */
+.model-actions {
+  margin: 1.5rem 0;
+}
+
+.ldr-download-section {
+  background-color: var(--lego-light-gray);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+  border: 3px solid var(--lego-green);
+}
+
+.ldr-download-section h3 {
+  font-family: "Fredoka One", cursive;
+  color: var(--lego-green);
+  margin-bottom: 0.75rem;
+  font-size: 1.4rem;
+}
+
+.ldr-download-button,
+.ldr-view-button {
+  margin-top: 1rem;
+}
+
+/* Improve the instructions container styling */
+.instructions-container {
+  background-color: white;
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.instructions-tabs {
+  display: flex;
+  border-bottom: 2px solid var(--lego-light-gray);
+  margin-bottom: 1.5rem;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.instructions-tab {
+  padding: 12px 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s ease;
+  color: var(--lego-black);
+}
+
+.instructions-tab.active {
+  border-bottom: 3px solid var(--lego-red);
+  color: var(--lego-red);
+}
+
+.instructions-tab:hover:not(.active) {
+  background-color: var(--lego-light-gray);
+  border-radius: 8px 8px 0 0;
+}
+
+.instructions-content {
+  max-height: 500px;
+  overflow-y: auto;
+  padding: 1rem;
+  background-color: var(--lego-light-gray);
+  border-radius: var(--radius);
+}
+
+.instructions-text {
+  line-height: 1.6;
+}
+
+.instructions-text h3 {
+  font-family: "Fredoka One", cursive;
+  color: var(--lego-red);
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.instructions-text pre {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  white-space: pre-wrap;
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  border: 2px solid var(--lego-yellow);
+}
+
+.instructions-note {
+  background-color: #e8f5e9;
+  border-left: 4px solid var(--lego-green);
+  padding: 12px 15px;
+  margin-bottom: 15px;
+  font-style: italic;
+  border-radius: 4px;
+}
+
+/* Improve the parts list styling */
+.parts-list-container {
+  padding: 1.5rem;
+}
+
+.parts-list-container h3 {
+  font-family: "Fredoka One", cursive;
+  color: var(--lego-red);
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+}
+
+.parts-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1.5rem;
+  background-color: white;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.parts-table th {
+  background-color: var(--lego-red);
+  color: white;
+  padding: 12px 15px;
+  text-align: left;
+  font-weight: 600;
+}
+
+.parts-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid var(--lego-light-gray);
+}
+
+.parts-table tr:nth-child(even) {
+  background-color: var(--lego-light-gray);
+}
+
+.parts-table tr:hover {
+  background-color: rgba(245, 197, 24, 0.1);
+}
+
+.color-variations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.color-variation {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background-color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.color-swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Improve the download button styling */
+.download-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: var(--lego-blue);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 3px 0 #004494;
+}
+
+.download-button:hover {
+  background-color: #0046a6;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 0 #004494;
+}
+
+.download-button:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 0 #004494;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .results-tabs {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .tab-button {
+    margin: 5px 0;
+  }
+
+  .instructions-tabs {
+    flex-direction: column;
+  }
+
+  .instructions-tab {
+    border-bottom: none;
+    border-left: 3px solid transparent;
+    padding: 10px;
+  }
+
+  .instructions-tab.active {
+    border-bottom: none;
+    border-left: 3px solid var(--lego-red);
+    background-color: var(--lego-light-gray);
+  }
+
+  .instructions-tab:hover:not(.active) {
+    background-color: var(--lego-light-gray);
+    border-radius: 8px 8px 0 0;
+  }
+
+  .model-section,
+  .instructions-section,
+  .parts-section {
+    padding: 1.5rem;
+  }
+
+  .model-viewer {
+    height: 350px;
+  }
+
+  .parts-table {
+    font-size: 14px;
+  }
+
+  .parts-table th,
+  .parts-table td {
+    padding: 8px 10px;
+  }
+
+  .color-variations {
+    flex-direction: column;
+    gap: 5px;
+  }
+}
+
+/* Add these styles for the 3D model preview in the top right */
+.model-preview-container {
+  width: 100%;
+  height: 300px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 4px solid var(--lego-yellow);
+  background-color: var(--lego-light-gray);
+}
+
+.model-preview-info {
+  font-style: italic;
+  color: var(--lego-blue);
+  font-weight: 600;
+  text-align: center;
+  margin-top: 10px;
 }
 

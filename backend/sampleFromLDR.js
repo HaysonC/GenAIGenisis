@@ -168,8 +168,9 @@ class LDRSampler {
       for (const view of views) {
         const outputPath = path.join(modelDir, `${view.name}.jpg`)
 
-        // Optimized command with the best parameters for visible rendering
+        // Updated command with the correct parameters as provided
         const command = `LDView "${ldrFilePath}" -SaveSnapshot="${outputPath}" -SaveWidth=1920 -SaveHeight=1080 -Background=0xFFFFFF -DefaultLatitude=${view.latitude} -DefaultLongitude=${view.longitude}`
+
         try {
           console.log(`Executing: ${command}`)
 
