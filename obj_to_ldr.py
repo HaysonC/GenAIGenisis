@@ -153,9 +153,9 @@ def save_ldr_file_vertical_flip_aligned(brick_layers, output_file):
 
 # Example Usage
 if __name__ == '__main__':
-    input_obj = "a_colourful_teddy_bear.obj"
+    input_obj = "a_bed.obj"
     scaled_path = rescale_obj_uniform(input_obj, "scaled_model.obj")
     voxels = voxelize_obj_trimesh(scaled_path, pitch=1.0)
     plan = process_3d_voxel_fully_connected(voxels)
     save_brick_plan(plan, "lego_plan.txt")
-    save_ldr_file_vertical_flip_aligned(plan, "lego_model.ldr")
+    save_ldr_file_vertical_flip_aligned(plan, "lego_model2.ldr")
