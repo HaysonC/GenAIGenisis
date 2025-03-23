@@ -8,6 +8,9 @@
   padding: 20px;
   max-width: 1200px;
   margin: 0 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .ldr-viewer-header {
@@ -346,114 +349,6 @@ input[type="file"] {
   border-top: 1px dashed #ccc;
 }
 
-.brick-count {
-  background-color: #f0f0f0;
-  border-radius: 3px;
-  padding: 1px 4px;
-  font-size: 0.75rem;
-}
-
-@media (max-width: 768px) {
-  .ldr-viewer-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
-  }
-  
-  .canvas-container {
-    height: 350px;
-  }
-  
-  .layers-list {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  }
-}
-
-.debug-info {
-  margin-top: 15px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  padding: 15px;
-  font-size: 0.9rem;
-}
-
-.debug-info summary {
-  cursor: pointer;
-  color: #0055bf;
-  font-weight: 500;
-  padding: 5px 0;
-}
-
-.debug-info summary:hover {
-  color: #003f8f;
-}
-
-.debug-info .debug-content {
-  margin-top: 10px;
-  padding: 10px;
-  background-color: #f0f0f0;
-  border-radius: 4px;
-  font-family: monospace;
-}
-
-/* Piece Summary styles */
-.piece-summary {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  background-color: rgba(255, 255, 255, 0.95);
-  padding: 15px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  z-index: 100;
-  max-width: 250px;
-  font-size: 0.9rem;
-  border-left: 3px solid #d01012;
-}
-
-.piece-summary h3 {
-  margin: 0 0 8px 0;
-  color: #d01012;
-  font-size: 1rem;
-  font-weight: 600;
-}
-
-.piece-summary p {
-  margin: 5px 0;
-  display: flex;
-  justify-content: space-between;
-}
-
-.piece-summary .brick-counts {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-top: 10px;
-  padding-top: 8px;
-  border-top: 1px dashed #ccc;
-}
-
-.piece-summary .brick-count-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 3px 0;
-}
-
-.piece-summary .brick-type {
-  font-weight: 500;
-}
-
-.piece-summary .brick-count {
-  background-color: #f0f0f0;
-  padding: 2px 8px;
-  border-radius: 10px;
-  font-size: 0.8rem;
-  font-weight: bold;
-  color: #333;
-}
-
-/* Layer Brick Counts */
 .layer-info .brick-counts {
   display: flex;
   flex-wrap: wrap;
@@ -713,4 +608,225 @@ input[type="file"] {
 
 .custom-slider:focus::-moz-range-thumb {
   box-shadow: 0 0 0 3px rgba(208, 16, 18, 0.3);
+}
+
+.viewer-container {
+  position: relative;
+  width: 100%;
+  height: 500px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.file-drop-zone {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+  border: 3px dashed #ccc;
+  border-radius: 8px;
+  text-align: center;
+  background-color: #f9f9f9;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.file-drop-zone:hover, .file-drop-zone.active {
+  border-color: #0055bf;
+  background-color: #f0f8ff;
+}
+
+.file-drop-zone h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #333;
+  font-size: 1.5rem;
+}
+
+.file-drop-zone p {
+  margin-bottom: 10px;
+  color: #666;
+}
+
+.browser-button {
+  background-color: #0055bf;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-top: 15px;
+  transition: background-color 0.3s;
+}
+
+.browser-button:hover {
+  background-color: #003f8f;
+}
+
+.controls-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.layers-control {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.layers-control-label {
+  font-weight: bold;
+  color: #333;
+  min-width: 100px;
+}
+
+.layers-slider {
+  flex: 1;
+  min-width: 200px;
+}
+
+.layers-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.layer-button {
+  background-color: #0055bf;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.layer-button:hover {
+  background-color: #003f8f;
+}
+
+.layer-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.layer-display {
+  padding: 10px;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  text-align: center;
+  min-width: 60px;
+  font-weight: bold;
+  color: #333;
+}
+
+.view-controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.view-control-button {
+  background-color: #0055bf;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  flex: 1;
+  min-width: calc(33.333% - 10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.view-control-button:hover {
+  background-color: #003f8f;
+}
+
+/* Pre-rendered views styles */
+.pre-rendered-views {
+  margin-top: 30px;
+  padding: 20px;
+  background-color: #f7f7f7;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.pre-rendered-views h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #333;
+  text-align: center;
+  font-size: 1.5rem;
+}
+
+.view-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.view-item {
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.view-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.view-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  display: block;
+}
+
+.view-caption {
+  padding: 10px;
+  text-align: center;
+  font-weight: bold;
+  color: #333;
+  background-color: #f5f5f5;
+  border-top: 1px solid #eee;
+  font-size: 0.9rem;
+  text-transform: capitalize;
+}
+
+@media (max-width: 768px) {
+  .view-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+  
+  .layers-control {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .layers-control-label {
+    margin-bottom: 5px;
+  }
+  
+  .view-controls {
+    flex-direction: column;
+  }
+  
+  .view-control-button {
+    min-width: 100%;
+  }
 } 

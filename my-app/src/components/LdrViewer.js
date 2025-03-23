@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
 import './LdrViewer.css';
 
 // Create a map of available brick definitions
@@ -98,7 +99,21 @@ const LAYER_HEIGHT = 24; // One brick height
 // Map to track created brick geometries to avoid recreation
 const brickGeometryCache = new Map();
 
-const LdrViewer = ({ ldrFile }) => {
+/**
+ * LdrViewer component that displays an LDR file in 3D
+ * @param {Object} props - Component props
+ * @param {File} props.ldrFile - LDR file to display
+ * @param {string} props.modelUrl - URL to the 3D model (OBJ) to display as a fallback
+ * @param {string} props.modelId - ID of the model
+ * @param {string} props.apiBaseUrl - Base URL for API requests
+ * @returns {JSX.Element} - The rendered component
+ */
+const LdrViewer = ({ 
+  ldrFile, 
+  modelUrl, 
+  modelId = '', 
+  apiBaseUrl = 'http://localhost:5001' 
+}) => {
   const containerRef = useRef(null);
   const fileInputRef = useRef(null);
   const [file, setFile] = useState(null);
@@ -117,6 +132,29 @@ const LdrViewer = ({ ldrFile }) => {
   const rendererRef = useRef(null);
   const controlsRef = useRef(null);
   const modelRef = useRef(null);
+  const gridHelperRef = useRef(null);
+  const objectsRef = useRef({ threeDObject: null, ldrObject: null });
+  const animationFrameRef = useRef(null);
+  const viewerContainerRef = useRef(null);
+  const mountRef = useRef(null);
+  
+  // Stats for performance monitoring
+  const statsRef = useRef(null);
+  
+  // State for UI controls  
+  const [showGrid, setShowGrid] = useState(true);
+  const [viewMode, setViewMode] = useState('3d'); // '3d' or 'layer'
+  const [showStats, setShowStats] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [autoRotate, setAutoRotate] = useState(false);
+
+  // Handle the file being dropped or uploaded
+  useEffect(() => {
+    if (ldrFile) {
+      setFile(ldrFile);
+      handleFileSelect({ target: { files: [ldrFile] } });
+    }
+  }, [ldrFile]);
 
   // Set up Three.js scene
   useEffect(() => {
@@ -927,6 +965,129 @@ const LdrViewer = ({ ldrFile }) => {
       reader.readAsText(ldrFile);
     }
   }, [ldrFile]);
+
+  // Add effect to handle modelUrl for direct 3D model display when LDR is not available
+  useEffect(() => {
+    if (!ldrFile && modelUrl && containerRef.current) {
+      console.log('No LDR file available, rendering OBJ model directly:', modelUrl);
+      
+      // Initialize the scene
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0xf5f5f5);
+      
+      // Initialize the camera
+      const container = containerRef.current;
+      const camera = new THREE.PerspectiveCamera(
+        75,
+        container.clientWidth / container.clientHeight,
+        0.1,
+        1000
+      );
+      camera.position.z = 5;
+      
+      // Initialize the renderer
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.setPixelRatio(window.devicePixelRatio);
+      
+      // Clear previous canvas if any
+      while (container.firstChild) {
+        container.removeChild(container.firstChild);
+      }
+      
+      container.appendChild(renderer.domElement);
+      
+      // Add lights
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+      scene.add(ambientLight);
+      
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+      directionalLight.position.set(1, 1, 1);
+      scene.add(directionalLight);
+      
+      // Add orbit controls
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+      controls.enablePan = true;
+      
+      // Load the OBJ model
+      const objLoader = new OBJLoader();
+      objLoader.load(
+        modelUrl,
+        (obj) => {
+          // Set material for all meshes
+          obj.traverse((child) => {
+            if (child instanceof THREE.Mesh) {
+              child.material = new THREE.MeshPhongMaterial({
+                color: 0xd01012, // LEGO red
+                specular: 0x111111,
+                shininess: 30,
+              });
+            }
+          });
+          
+          // Calculate bounding box to center and scale model
+          const bbox = new THREE.Box3().setFromObject(obj);
+          const center = bbox.getCenter(new THREE.Vector3());
+          const size = bbox.getSize(new THREE.Vector3());
+          
+          // Center model
+          obj.position.x = -center.x;
+          obj.position.y = -center.y;
+          obj.position.z = -center.z;
+          
+          // Scale model to fit view
+          const maxDim = Math.max(size.x, size.y, size.z);
+          if (maxDim > 2) {
+            const scale = 2 / maxDim;
+            obj.scale.set(scale, scale, scale);
+          }
+          
+          scene.add(obj);
+          
+          // Set up animation loop
+          function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+          }
+          animate();
+        },
+        (xhr) => {
+          console.log((xhr.loaded / xhr.total) * 100 + '% loaded');
+        },
+        (error) => {
+          console.error('Error loading OBJ model:', error);
+        }
+      );
+      
+      // Handle window resize
+      const handleResize = () => {
+        const width = container.clientWidth;
+        const height = container.clientHeight;
+        
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+        
+        renderer.setSize(width, height);
+      };
+      
+      window.addEventListener('resize', handleResize);
+      
+      return () => {
+        window.removeEventListener('resize', handleResize);
+        
+        // Clean up resources
+        if (scene) {
+          scene.clear();
+        }
+        if (renderer) {
+          renderer.dispose();
+        }
+      };
+    }
+  }, [ldrFile, modelUrl]);
 
   return (
     <div className="ldr-viewer">

@@ -1,0 +1,25 @@
+# Node.js dependencies
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Environment variables
+.env
+
+# Generated files
+uploads/*
+!uploads/.gitkeep
+models/*
+!models/.gitkeep
+views/*
+!views/.gitkeep
+instructions/*
+!instructions/.gitkeep
+ldr_output/*
+!ldr_output/.gitkeep
+parts/*
+!parts/.gitkeep
+
+# Logs
+*.log 

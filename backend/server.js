@@ -106,7 +106,7 @@ const upload = multer({ storage: storage })
 /**
  * Initialize models
  */
-const geminiModel = new GeminiImageToText()
+const geminiImageToText = new GeminiImageToText()
 const shapeGenerator = new ShapeGenerator()
 const ldrSampler = new LDRSampler()
 const modelToLdr = new ModelToLDR()
@@ -148,7 +148,7 @@ app.post("/upload-image", upload.single("image"), (req, res) => {
   }
 
   const imagePath = req.file.path
-  const result = geminiModel.attachImage(imagePath)
+  const result = geminiImageToText.attachImage(imagePath)
   res.json({ message: result, imagePath })
 })
 
@@ -159,11 +159,43 @@ app.post("/upload-image", upload.single("image"), (req, res) => {
  */
 app.get("/image-description", async (req, res) => {
   try {
-    const description = await geminiModel.predict()
+    const description = await geminiImageToText.predict()
     res.json({ description })
   } catch (error) {
     console.error("Error getting image description:", error)
     res.status(500).json({ message: "Error getting image description", error: error.message })
+  }
+})
+
+/**
+ * Endpoint to process an image - uploads and generates description in one call
+ * @route POST /process-image
+ * @param {File} image - The image file to upload
+ * @returns {Object} Image URL and generated description
+ */
+app.post("/process-image", upload.single("image"), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: "No image provided" })
+  }
+
+  try {
+    const imagePath = req.file.path
+    const imageUrl = `/uploads/${path.basename(imagePath)}`
+    
+    // Attach the image to the model
+    geminiImageToText.attachImage(imagePath)
+    
+    // Generate the description
+    const description = await geminiImageToText.predict()
+    
+    res.json({ 
+      imageUrl, 
+      description,
+      message: "Image processed successfully" 
+    })
+  } catch (error) {
+    console.error("Error processing image:", error)
+    res.status(500).json({ message: "Error processing image", error: error.message })
   }
 })
 
@@ -174,7 +206,7 @@ app.get("/image-description", async (req, res) => {
  */
 app.get("/predict", async (req, res) => {
   try {
-    const result = await geminiModel.predict()
+    const result = await geminiImageToText.predict()
     res.json({ text: result })
   } catch (error) {
     console.error("Error predicting:", error)
@@ -352,7 +384,7 @@ app.post("/process-ldr", upload.single("ldrFile"), async (req, res) => {
       console.log(`Using original description for instructions: "${originalDescription}"`)
 
       // Pass the original description to the generateInstructions method
-      const instructions = await geminiModel.generateInstructions(result.viewPaths, originalDescription)
+      const instructions = await geminiImageToText.generateInstructions(result.viewPaths, originalDescription)
       console.log("Successfully generated instructions")
       updateProgress(90, "Instructions generated successfully")
 
@@ -596,7 +628,7 @@ app.post("/generate-ldr-from-text", async (req, res) => {
 
         // Step 4: Generate instructions from the views
         try {
-          const instructions = await geminiModel.generateInstructions(
+          const instructions = await geminiImageToText.generateInstructions(
             viewsResult.viewPaths,
             originalDescription || prompt,
           )
@@ -676,7 +708,7 @@ app.post("/generate-ldr-from-image", async (req, res) => {
     let description
     try {
       updateProgress(15, "Generating description from image")
-      description = await geminiModel.predict()
+      description = await geminiImageToText.predict()
       console.log(`Generated description from image: "${description}"`)
       updateProgress(25, "Description generated successfully")
     } catch (error) {
@@ -688,7 +720,7 @@ app.post("/generate-ldr-from-image", async (req, res) => {
     // Step 2: Generate 3D model from the description
     const modelOptions = {
       guidance_scale: req.body.options?.guidance_scale || 15.0,
-      num_steps: req.body.options?.num_steps || 24,
+      num_steps: req.body.options?.num_steps || 12,
     }
 
     updateProgress(30, "Generating 3D model from description")
@@ -706,45 +738,15 @@ app.post("/generate-ldr-from-image", async (req, res) => {
       })
       updateProgress(75, "LDR conversion successful")
 
-      // Step 4: Generate views from the LDR file
-      updateProgress(80, "Generating views from LDR model")
-      const viewsResult = await ldrSampler.sampleViews(ldrResult.ldrFilePath)
-      console.log(`Generated ${viewsResult.viewPaths.length} views for LDR model`)
-      updateProgress(85, "Views generated successfully")
-
-      // Step 5: Generate instructions from the views
-      updateProgress(90, "Generating instructions from views")
-      const instructions = await geminiModel.generateInstructions(
-        viewsResult.viewPaths,
-        req.body.originalDescription || description,
-      )
-      console.log("Generated instructions from views")
-      updateProgress(95, "Instructions generated successfully")
-
-      // Save the instructions to files
-      const modelInstructionsDir = path.join(instructionsDir, viewsResult.modelId)
-      if (!fs.existsSync(modelInstructionsDir)) {
-        fs.mkdirSync(modelInstructionsDir, { recursive: true })
-      }
-
-      for (const [type, text] of Object.entries(instructions)) {
-        const filePath = path.join(modelInstructionsDir, `${type}.txt`)
-        fs.writeFileSync(filePath, text)
-        console.log(`Saved ${type} instructions to ${filePath}`)
-      }
+      // Skip view generation and directly return the results
+      updateProgress(95, "Process nearly complete")
 
       // Return all information
       updateProgress(100, "Process completed successfully")
       res.json({
         description,
         model: modelResult,
-        ldr: ldrResult,
-        views: {
-          modelId: viewsResult.modelId,
-          viewPaths: viewsResult.viewPaths.map((p) => `/views/${viewsResult.modelId}/${path.basename(p)}`),
-        },
-        instructions,
-        originalDescription: instructions.original || req.body.originalDescription || description,
+        ldr: ldrResult
       })
     } catch (conversionError) {
       // Return just the description and model result with a note about LDR conversion
@@ -885,7 +887,7 @@ app.post("/generate-model-from-image", async (req, res) => {
     // First, get the description from Gemini
     let description
     try {
-      description = await geminiModel.predict()
+      description = await geminiImageToText.predict()
       console.log(`Generated description from image: "${description}"`)
     } catch (error) {
       console.error("Error generating description from image:", error)
@@ -1058,6 +1060,170 @@ app.post("/upload-ldr-for-parts", upload.single("ldrFile"), async (req, res) => 
 })
 
 /**
+ * Get layer information from LDR file
+ */
+app.post("/get-ldr-layers", async (req, res) => {
+  try {
+    const { ldrFilePath } = req.body
+    
+    if (!ldrFilePath) {
+      return res.status(400).json({ error: "LDR file path is required" })
+    }
+    
+    // Check if file exists
+    const fullPath = ldrFilePath.startsWith("/") ? ldrFilePath : path.join(__dirname, ldrFilePath)
+    if (!fs.existsSync(fullPath)) {
+      return res.status(404).json({ error: "LDR file not found" })
+    }
+    
+    // Create a new instance of the LDR parser
+    // Use Python script for parsing LDR file
+    const pythonProcess = spawn('python3', ['ldr_parser.py', fullPath]);
+    
+    let dataString = '';
+    let errorString = '';
+    
+    pythonProcess.stdout.on('data', (data) => {
+      dataString += data.toString();
+    });
+    
+    pythonProcess.stderr.on('data', (data) => {
+      errorString += data.toString();
+    });
+    
+    pythonProcess.on('close', (code) => {
+      if (code !== 0) {
+        console.error(`Python process exited with code ${code}`);
+        console.error(errorString);
+        return res.status(500).json({ error: "Failed to parse LDR file", details: errorString });
+      }
+      
+      try {
+        const layersData = JSON.parse(dataString);
+        return res.json(layersData);
+      } catch (parseError) {
+        console.error("Error parsing JSON from Python script", parseError);
+        return res.status(500).json({ error: "Failed to parse layer data from LDR file" });
+      }
+    });
+  } catch (error) {
+    console.error("Error in /get-ldr-layers:", error)
+    res.status(500).json({
+      error: "Failed to process LDR layers",
+      message: error.message,
+    })
+  }
+})
+
+/**
+ * Generate instructions for each layer using Gemini
+ */
+app.post("/generate-layer-instructions", async (req, res) => {
+  try {
+    const { ldrFilePath, description, layersCount } = req.body
+    
+    if (!ldrFilePath || !description || !layersCount) {
+      return res.status(400).json({ 
+        error: "Missing required parameters", 
+        required: ["ldrFilePath", "description", "layersCount"] 
+      })
+    }
+    
+    // Check if file exists
+    const fullPath = ldrFilePath.startsWith("/") ? ldrFilePath : path.join(__dirname, ldrFilePath)
+    if (!fs.existsSync(fullPath)) {
+      return res.status(404).json({ error: "LDR file not found" })
+    }
+    
+    // Get model ID from filename
+    const modelId = path.basename(ldrFilePath, path.extname(ldrFilePath))
+    
+    // Check if we already have instructions for this model
+    const modelInstructionsDir = path.join(instructionsDir, modelId, "layers")
+    let instructions = []
+    
+    // If directory exists, check if we have layer instructions
+    if (fs.existsSync(modelInstructionsDir)) {
+      const existingFiles = fs.readdirSync(modelInstructionsDir)
+      const layerFiles = existingFiles.filter(file => file.startsWith("layer_") && file.endsWith(".txt"))
+      
+      // If we have the correct number of layer files, use them
+      if (layerFiles.length === parseInt(layersCount)) {
+        console.log(`Using existing layer instructions for model ${modelId}`)
+        
+        // Read each layer file
+        for (let i = 0; i < layerFiles.length; i++) {
+          const layerNum = i + 1
+          const layerFile = path.join(modelInstructionsDir, `layer_${layerNum}.txt`)
+          
+          if (fs.existsSync(layerFile)) {
+            const instructionText = fs.readFileSync(layerFile, "utf-8")
+            instructions.push(instructionText)
+          } else {
+            // If a file is missing, add placeholder
+            instructions.push(`Instructions for layer ${layerNum}`)
+          }
+        }
+        
+        return res.json({ instructions })
+      }
+    }
+    
+    // Create directory if it doesn't exist
+    if (!fs.existsSync(modelInstructionsDir)) {
+      fs.mkdirSync(modelInstructionsDir, { recursive: true })
+    }
+    
+    // Generate instructions for each layer using Gemini
+    console.log(`Generating instructions for ${layersCount} layers for model ${modelId}`)
+    
+    // Base prompt for Gemini
+    const basePrompt = `The following is a LEGO model description: "${description}". 
+    This model has ${layersCount} layers of bricks. 
+    Generate step-by-step instructions for building layer {LAYER_NUM} of this model. 
+    Instructions should be concise and clear, using terminology like "Place a 2x4 brick at the center" or 
+    "Add two 1x2 plates to connect the previous sections". 
+    Be specific about placement relative to previous layers.`
+    
+    // Generate instructions for each layer
+    for (let i = 0; i < layersCount; i++) {
+      const layerNum = i + 1
+      const layerPrompt = basePrompt.replace("{LAYER_NUM}", layerNum)
+      
+      try {
+        // Call Gemini API
+        const layerInstructions = await geminiImageToText.generateText(layerPrompt)
+        
+        // Save to file
+        const layerFile = path.join(modelInstructionsDir, `layer_${layerNum}.txt`)
+        fs.writeFileSync(layerFile, layerInstructions)
+        
+        // Add to response
+        instructions.push(layerInstructions)
+      } catch (geminiError) {
+        console.error(`Error generating instructions for layer ${layerNum}:`, geminiError)
+        
+        // Add placeholder
+        const placeholder = `Instructions for layer ${layerNum}: Place the bricks according to the model.`
+        instructions.push(placeholder)
+        
+        // Save placeholder to file
+        const layerFile = path.join(modelInstructionsDir, `layer_${layerNum}.txt`)
+        fs.writeFileSync(layerFile, placeholder)
+      }
+    }
+    
+    res.json({ instructions })
+  } catch (error) {
+    console.error("Error in /generate-layer-instructions:", error)
+    res.status(500).json({
+      error: "Failed to generate layer instructions",
+      message: error.message,
+    })
+  }
+})
+
+/**
  * Serve static React app in production
  */
 if (process.env.NODE_ENV === "production") {
@@ -1086,6 +1252,34 @@ app.use((req, res) => {
     message: "Endpoint not found",
   })
 })
+
+/**
+ * Add a new endpoint to get LDR file content by path
+ * @route GET /get-ldr-file
+ */
+app.get("/get-ldr-file", async (req, res) => {
+  try {
+    const filePath = req.query.filePath;
+    
+    if (!filePath) {
+      return res.status(400).json({ error: "File path is required" });
+    }
+    
+    // Check if the file exists
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ error: "File not found" });
+    }
+    
+    // Read the file content
+    const content = fs.readFileSync(filePath, "utf8");
+    
+    // Return the file content
+    res.json({ content });
+  } catch (error) {
+    console.error("Error getting LDR file:", error);
+    res.status(500).json({ error: "Failed to get LDR file" });
+  }
+});
 
 /**
  * Start the server

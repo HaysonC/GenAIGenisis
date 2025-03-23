@@ -303,103 +303,6 @@ class LDRSampler {
     }
   }
 
-  // Method 3: Use L3P and POV-Ray
-  async sampleViewsWithL3P(ldrFilePath) {
-    if (!fs.existsSync(ldrFilePath)) {
-      throw new Error(`LDR file not found: ${ldrFilePath}`)
-    }
-
-    console.log(`Sampling views from LDR file using L3P and POV-Ray: ${ldrFilePath}`)
-
-    // Create model directory using the helper method
-    let modelId, modelDir
-    try {
-      const result = await this.createModelDirectory()
-      modelId = result.modelId
-      modelDir = result.modelDir
-    } catch (dirError) {
-      console.error("Failed to create model directory:", dirError)
-      throw new Error(`Failed to create model directory: ${dirError.message}`)
-    }
-
-    try {
-      // Check if L3P and POV-Ray are installed
-      try {
-        console.log("Checking for L3P and POV-Ray availability...")
-        const l3pExists = await this.checkCommandExists("l3p")
-        const povrayExists = await this.checkCommandExists("povray")
-
-        if (!l3pExists || !povrayExists) {
-          throw new Error("L3P or POV-Ray not available - this is expected if you haven't installed these tools")
-        }
-
-        console.log("L3P and POV-Ray are installed and available")
-      } catch (error) {
-        console.log("L3P or POV-Ray not found in PATH - this is OK if other rendering methods are available")
-        throw new Error("L3P or POV-Ray not available: " + error.message)
-      }
-
-      // Define view angles
-      const views = [
-        { name: "front", args: "-b0,0" },
-        { name: "back", args: "-b0,180" },
-        { name: "top", args: "-b90,0" },
-        { name: "bottom", args: "-b-90,0" },
-        { name: "left", args: "-b0,90" },
-        { name: "right", args: "-b0,-90" },
-      ]
-
-      const viewPaths = []
-
-      // Generate each view using L3P and POV-Ray
-      for (const view of views) {
-        const povPath = path.join(this.tempDir, `${modelId}_${view.name}.pov`)
-        const outputPath = path.join(modelDir, `${view.name}.jpg`)
-
-        // Step 1: Convert LDR to POV using L3P
-        const l3pCommand = `l3p "${ldrFilePath}" ${view.args} -o"${povPath}" -ldraw="${this.ldrawPartsPath}"`
-
-        // Step 2: Render POV to image using POV-Ray
-        const povrayCommand = `povray "${povPath}" +W800 +H600 +A +FJ +O"${outputPath}"`
-
-        try {
-          console.log(`Executing L3P: ${l3pCommand}`)
-          execSync(l3pCommand, { timeout: 30000 })
-
-          console.log(`Executing POV-Ray: ${povrayCommand}`)
-          execSync(povrayCommand, { timeout: 60000 })
-
-          viewPaths.push(outputPath)
-          console.log(`Saved view: ${outputPath}`)
-        } catch (error) {
-          console.error(`Error generating ${view.name} view:`, error)
-          throw new Error(`Failed to generate ${view.name} view: ${error.message}`)
-        }
-      }
-
-      if (viewPaths.length === 0) {
-        throw new Error("Failed to generate any views with L3P and POV-Ray")
-      }
-
-      return {
-        modelId,
-        viewPaths,
-      }
-    } catch (error) {
-      console.error("Error using L3P and POV-Ray:", error)
-      // Clean up the model directory if it was created but no views were generated
-      if (fs.existsSync(modelDir)) {
-        try {
-          fs.rmdirSync(modelDir, { recursive: true })
-          console.log(`Cleaned up empty model directory: ${modelDir}`)
-        } catch (cleanupError) {
-          console.error(`Failed to clean up model directory: ${cleanupError.message}`)
-        }
-      }
-      throw new Error(`Failed to sample views with L3P and POV-Ray: ${error.message}`)
-    }
-  }
-
   // Main method that tries all available methods
   async sampleViews(ldrFilePath) {
     if (!fs.existsSync(ldrFilePath)) {
@@ -411,8 +314,7 @@ class LDRSampler {
     // Try each method in order of preference
     const methods = [
       { name: "LDView", method: this.sampleViewsWithLDView.bind(this) },
-      { name: "LeoCAD", method: this.sampleViewsWithLeoCAD.bind(this) },
-      { name: "L3P", method: this.sampleViewsWithL3P.bind(this) },
+      { name: "LeoCAD", method: this.sampleViewsWithLeoCAD.bind(this) }
     ]
 
     const errors = []
