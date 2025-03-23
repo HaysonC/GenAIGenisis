@@ -1,0 +1,128 @@
+.ldr-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.ldr-page-header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.ldr-page-header h1 {
+  color: #d01012;
+  font-size: 2.4rem;
+  margin-bottom: 10px;
+}
+
+.ldr-page-header p {
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.sample-files {
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 30px;
+}
+
+.sample-files h3 {
+  color: #333;
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+.sample-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  align-items: center;
+}
+
+.sample-button {
+  background-color: #0055bf;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+.sample-button:hover {
+  background-color: #003f8f;
+}
+
+.load-from-url {
+  display: flex;
+  gap: 10px;
+  flex: 1;
+  min-width: 300px;
+}
+
+.url-input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.url-button {
+  background-color: #00852b;
+  color: white;
+  border: none;
+  padding: 0 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+.url-button:hover {
+  background-color: #006621;
+}
+
+.url-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.ldr-viewer-container {
+  margin-bottom: 30px;
+}
+
+.ldr-page-footer {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 30px;
+}
+
+.ldr-page-footer h3 {
+  color: #0055bf;
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+.ldr-page-footer p {
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 15px;
+}
+
+@media (max-width: 768px) {
+  .sample-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .load-from-url {
+    width: 100%;
+  }
+} 
