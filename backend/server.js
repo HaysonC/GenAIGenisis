@@ -21,6 +21,35 @@ app.use(express.json())
 app.use(cors())
 
 /**
+ * Endpoint for Gemini text analysis
+ * @route POST /api/gemini/analyze
+ * @param {Object} req.body - Request body
+ * @param {string} req.body.prompt - The prompt to send to Gemini
+ * @returns {Object} Gemini API response
+ */
+app.post("/api/gemini/analyze", async (req, res) => {
+  try {
+    const { prompt } = req.body;
+    
+    if (!prompt) {
+      return res.status(400).json({ error: "Prompt is required" });
+    }
+    
+    // Create a new Gemini client instance
+    const gemini = new GeminiImageToText();
+    
+    // Send the prompt to Gemini and get the response
+    const response = await gemini.generateText(prompt);
+    
+    // Return the response
+    res.json({ response });
+  } catch (error) {
+    console.error("Error in Gemini text analysis:", error);
+    res.status(500).json({ error: "Failed to analyze with Gemini" });
+  }
+});
+
+/**
  * Global variable to track generation progress
  * @type {Object}
  * @property {number} progress - Progress percentage (0-100)
