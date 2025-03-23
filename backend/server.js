@@ -638,7 +638,7 @@ app.post("/generate-ldr-from-text", async (req, res) => {
     // Step 1: Generate the 3D model
     const modelOptions = {
       guidance_scale: options?.guidance_scale || 15.0,
-      num_steps: options?.num_steps || 12, // Updated to 24 as requested
+      num_steps: options?.num_steps || 32, // Updated to 24 as requested
     }
 
     const modelResult = await shapeGenerator.generateModel(prompt, modelOptions)
@@ -749,7 +749,7 @@ app.post("/generate-ldr-from-image", async (req, res) => {
     // Step 2: Generate 3D model from the description
     const modelOptions = {
       guidance_scale: req.body.options?.guidance_scale || 15.0,
-      num_steps: req.body.options?.num_steps || 12,
+      num_steps: req.body.options?.num_steps || 32,
     }
 
     updateProgress(30, "Generating 3D model from description")
@@ -861,7 +861,13 @@ print('Conversion successful')
 
     try {
       // Convert the OBJ to LDR using ModelToLDR
-      const result = await modelToLdr.convertOBJToLDR(fullModelPath, options || {})
+      // Add a higher resolution option to ensure taller models are fully converted
+      const conversionOptions = { 
+        ...options,
+        resolution: (options && options.resolution) || 128 // Default to 128 if not specified
+      };
+      
+      const result = await modelToLdr.convertOBJToLDR(fullModelPath, conversionOptions)
       res.json(result)
     } catch (conversionError) {
       console.error("OBJ to LDR conversion error:", conversionError)

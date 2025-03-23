@@ -10,7 +10,7 @@ import colorsys
 
 
 # Step 0: Uniform Rescale with Centering and Vertex Color Extraction
-def rescale_obj_uniform(input_path, output_path, target_dims=(64, 64, 30)):
+def rescale_obj_uniform(input_path, output_path, target_dims=(64, 64, 64)):
     mesh = trimesh.load(input_path, force='mesh')
     bounds = mesh.bounds
     scale_factors = np.array(target_dims) / (bounds[1] - bounds[0])
@@ -105,7 +105,7 @@ def bounding_box(mask):
     return tuple(slice(min_, max_) for min_, max_ in zip(min_coords, max_coords))
 
 # Step 6: Process Voxel Layers
-def process_3d_voxel_fully_connected(voxels, max_layers=30):
+def process_3d_voxel_fully_connected(voxels, max_layers=64):
     voxels = connect_components_minimal(voxels)
     interior_voxels = create_interior_mask(voxels)
     z_layers = interior_voxels.shape[2]
@@ -406,7 +406,8 @@ if __name__ == '__main__':
         
         # Step 1: Rescale and center the model (with temp file for intermediate steps)
         temp_obj_path = obj_file_path + ".rescaled.obj"
-        scaled_path, mesh = rescale_obj_uniform(obj_file_path, temp_obj_path, target_dims=(resolution, resolution, resolution//2))
+        # Use the same resolution for height as for width and depth
+        scaled_path, mesh = rescale_obj_uniform(obj_file_path, temp_obj_path, target_dims=(resolution, resolution, resolution))
         print("Mesh rescaled and centered")
         
         # Step 2: Voxelize the model
@@ -414,7 +415,8 @@ if __name__ == '__main__':
         print(f"Voxelized model with shape: {voxels.shape}")
         
         # Step 3: Process voxels to bricks
-        plan = process_3d_voxel_fully_connected(voxels)
+        # Use the same max layer count as resolution to ensure entire height is captured
+        plan = process_3d_voxel_fully_connected(voxels, max_layers=resolution)
         print(f"Generated {len(plan)} brick layers")
         
         # Step 4: Assign colors to bricks

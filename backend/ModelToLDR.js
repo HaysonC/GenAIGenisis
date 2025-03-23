@@ -108,7 +108,7 @@ print('Conversion successful')
 
     console.log(`Converting OBJ to LDR: ${objPath}`)
 
-    const resolution = options.resolution || 64
+    const resolution = options.resolution || 128
     const modelId = Date.now().toString()
     const outputLdrPath = path.join(this.outputDir, `${modelId}.ldr`)
 
