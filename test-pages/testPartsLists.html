@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LEGOFIKS - LDR Parts Analyzer</title>
+<style>
+  :root {
+    --lego-red: #d01012;
+    --lego-dark-red: #8d1b1b;
+    --lego-yellow: #f5c518;
+    --lego-blue: #0d69ab;
+    --lego-green: #00852b;
+    --lego-black: #05131d;
+    --lego-gray: #a3a2a4;
+    --lego-light-gray: #e3e3e3;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f5f5f5;
+    padding: 20px;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin-bottom: 30px;
+  }
+
+  header {
+    background-color: var(--lego-red);
+    color: white;
+    padding: 20px;
+    text-align: center;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 2.2rem;
+  }
+
+  h2 {
+    color: var(--lego-red);
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--lego-light-gray);
+  }
+
+  h3 {
+    color: var(--lego-blue);
+    margin-bottom: 10px;
+  }
+
+  .content {
+    padding: 20px;
+  }
+
+  .upload-section {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .upload-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .file-input-container {
+    position: relative;
+    border: 2px dashed var(--lego-gray);
+    border-radius: 8px;
+    padding: 30px;
+    text-align: center;
+    background-color: #fafafa;
+    transition: all 0.3s ease;
+  }
+
+  .file-input-container:hover {
+    border-color: var(--lego-red);
+    background-color: #f0f0f0;
+  }
+
+  .file-input-container.has-file {
+    border-color: var(--lego-green);
+    background-color: rgba(0, 133, 43, 0.1);
+  }
+
+  .file-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .file-info {
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: #666;
+  }
+
+  .file-name {
+    font-weight: bold;
+    color: var(--lego-blue);
+  }
+
+  .button {
+    background-color: var(--lego-red);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 12px 20px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .button:hover {
+    background-color: var(--lego-dark-red);
+  }
+
+  .button:disabled {
+    background-color: var(--lego-gray);
+    cursor: not-allowed;
+  }
+
+  .button.secondary {
+    background-color: var(--lego-blue);
+  }
+
+  .button.secondary:hover {
+    background-color: #095a91;
+  }
+
+  .button.clear {
+    background-color: #757575;
+  }
+
+  .button.clear:hover {
+    background-color: #616161;
+  }
+
+  .loading {
+    display: none;
+    text-align: center;
+    padding: 30px;
+  }
+
+  .spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top: 4px solid var(--lego-red);
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .error-container {
+    background-color: #ffebee;
+    border-left: 5px solid #f44336;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    display: none;
+  }
+
+  .error-title {
+    color: #d32f2f;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+
+  .error-message {
+    color: #c62828;
+    font-family: monospace;
+    white-space: pre-wrap;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .success-container {
+    background-color: #e8f5e9;
+    border-left: 5px solid #4caf50;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    display: none;
+  }
+
+  .success-title {
+    color: #2e7d32;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+
+  .success-message {
+    color: #1b5e20;
+  }
+
+  .results-container {
+    display: none;
+  }
+
+  .model-info {
+    background-color: #e8f5e9;
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    font-weight: bold;
+    color: var(--lego-green);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .parts-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+  }
+
+  .part-item {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background-color: white;
+  }
+
+  .part-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  }
+
+  .part-image {
+    width: 100%;
+    height: 150px;
+    background-color: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .part-image img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  .part-details {
+    padding: 15px;
+  }
+
+  .part-name {
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: var(--lego-blue);
+  }
+
+  .part-count {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--lego-red);
+    margin-bottom: 10px;
+  }
+
+  .color-variations {
+    margin-top: 10px;
+  }
+
+  .color-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+  }
+
+  .color-swatch {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    margin-right: 8px;
+    border: 1px solid #ddd;
+  }
+
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 20px;
+  }
+
+  .tab {
+    padding: 10px 20px;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+  }
+
+  .tab.active {
+    border-bottom-color: var(--lego-red);
+    font-weight: bold;
+  }
+
+  .tab-content {
+    display: none;
+  }
+
+  .tab-content.active {
+    display: block;
+  }
+
+  .sample-ldr {
+    background-color: #f5f5f5;
+    padding: 15px;
+    border-radius: 4px;
+    font-family: monospace;
+    white-space: pre;
+    overflow-x: auto;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  .button-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+  }
+
+  .footer {
+    text-align: center;
+    margin-top: 30px;
+    padding: 20px;
+    color: #666;
+    font-size: 0.9rem;
+  }
+
+  @media (max-width: 768px) {
+    .parts-container {
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+
+    .button-group {
+      flex-direction: column;
+    }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>LEGOFIKS - LDR Parts Analyzer</h1>
+</header>
+
+<div class="container">
+  <div class="content">
+    <div class="tabs">
+      <div class="tab active" data-tab="upload">Upload LDR File</div>
+      <div class="tab" data-tab="sample">Sample LDR</div>
+    </div>
+
+    <div class="tab-content active" id="upload-tab">
+      <div class="upload-section">
+        <h2>Upload LDR File</h2>
+        <p>Select an LDR file to analyze and view its parts breakdown.</p>
+
+        <form id="uploadForm" class="upload-form">
+          <div id="fileInputContainer" class="file-input-container">
+            <div class="upload-placeholder">
+              <p>Drag and drop your LDR file here or click to browse</p>
+              <p class="file-info">Acceptable formats: .ldr, .mpd, .dat</p>
+            </div>
+            <div id="fileInfo" class="file-info" style="display: none;">
+              <p>Selected file: <span id="fileName" class="file-name"></span></p>
+              <p>Size: <span id="fileSize"></span></p>
+            </div>
+            <input type="file" id="ldrFile" name="ldrFile" accept=".ldr,.mpd,.dat" class="file-input" required>
+          </div>
+
+          <button type="submit" id="submitButton" class="button" disabled>Analyze Parts</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="tab-content" id="sample-tab">
+      <div class="upload-section">
+        <h2>Sample LDR File</h2>
+        <p>Use this sample LDR file to test the parts analyzer.</p>
+
+        <div class="sample-ldr" id="sampleLdrContent">
+0 Tree Model
+0 Name: tree.ldr
+0 Author: ChatGPT
+0 !LDRAW_ORG Unofficial Model
+
+0 // Stem - Brown (color 6)
+1 6 0 0 0 1 0 0 0 1 0 0 0 1 30068.dat
+1 6 0 24 0 1 0 0 0 1 0 0 0 1 30068.dat
+1 6 0 48 0 1 0 0 0 1 0 0 0 1 30068.dat
+
+0 // Leaves - Green (color 2)
+1 2 0 72 0 1 0 0 0 1 0 0 0 1 2518.dat
+1 2 20 72 0 0 0 -1 0 1 0 1 0 0 2518.dat
+1 2 -20 72 0 0 0 1 0 1 0 -1 0 0 2518.dat
+1 2 0 72 20 1 0 0 0 0 -1 0 1 0 2518.dat
+1 2 0 72 -20 1 0 0 0 0 1 0 -1 0 2518.dat
+        </div>
+
+        <button id="analyzeSampleButton" class="button">Analyze Sample</button>
+      </div>
+    </div>
+
+    <div id="errorContainer" class="error-container">
+      <div class="error-title">Error</div>
+      <div id="errorMessage" class="error-message"></div>
+    </div>
+
+    <div id="successContainer" class="success-container">
+      <div class="success-title">Success</div>
+      <div id="successMessage" class="success-message"></div>
+    </div>
+
+    <div id="loading" class="loading">
+      <div class="spinner"></div>
+      <h3>Analyzing LDR File</h3>
+      <p>Extracting parts information. This may take a moment...</p>
+    </div>
+
+    <div id="results" class="results-container">
+      <h2>Parts Analysis Results</h2>
+
+      <div id="modelInfo" class="model-info">
+        <span id="modelInfoText">Model information will appear here</span>
+        <button id="clearResults" class="button clear">Clear Results</button>
+      </div>
+
+      <h3>Parts Breakdown</h3>
+      <div id="partsContainer" class="parts-container"></div>
+
+      <div class="button-group">
+        <button id="downloadBtn" class="button secondary">Download Parts List</button>
+        <button id="newAnalysisBtn" class="button">Analyze Another File</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <p>LEGOFIKS - LDR Parts Analyzer | LEGO® is a trademark of the LEGO Group</p>
+</div>
+
+<script>
+  // Configuration
+  const SERVER_URL = window.location.protocol + '//' + window.location.hostname + ':5001';
+
+  // DOM Elements
+  const uploadForm = document.getElementById('uploadForm');
+  const fileInput = document.getElementById('ldrFile');
+  const fileInputContainer = document.getElementById('fileInputContainer');
+  const fileInfo = document.getElementById('fileInfo');
+  const fileName = document.getElementById('fileName');
+  const fileSize = document.getElementById('fileSize');
+  const submitButton = document.getElementById('submitButton');
+  const errorContainer = document.getElementById('errorContainer');
+  const errorMessage = document.getElementById('errorMessage');
+  const successContainer = document.getElementById('successContainer');
+  const successMessage = document.getElementById('successMessage');
+  const loading = document.getElementById('loading');
+  const results = document.getElementById('results');
+  const modelInfo = document.getElementById('modelInfo');
+  const modelInfoText = document.getElementById('modelInfoText');
+  const partsContainer = document.getElementById('partsContainer');
+  const clearResults = document.getElementById('clearResults');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const newAnalysisBtn = document.getElementById('newAnalysisBtn');
+  const analyzeSampleButton = document.getElementById('analyzeSampleButton');
+  const sampleLdrContent = document.getElementById('sampleLdrContent');
+  const tabs = document.querySelectorAll('.tab');
+
+  // Helper Functions
+  function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  function showError(message) {
+    errorContainer.style.display = 'block';
+    errorMessage.textContent = message;
+    errorContainer.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function showSuccess(message) {
+    successContainer.style.display = 'block';
+    successMessage.textContent = message;
+    successContainer.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function clearAllResults() {
+    partsContainer.innerHTML = '';
+    modelInfoText.textContent = 'Model information will appear here';
+    results.style.display = 'none';
+    errorContainer.style.display = 'none';
+    successContainer.style.display = 'none';
+  }
+
+  function resetForm() {
+    uploadForm.reset();
+    fileInfo.style.display = 'none';
+    fileInputContainer.classList.remove('has-file');
+    submitButton.disabled = true;
+  }
+
+  // Get LDraw color information
+  function getLDrawColorHex(colorCode) {
+    const colorMap = {
+      '0': '#05131D', // Black
+      '1': '#0055BF', // Blue
+      '2': '#237841', // Green
+      '3': '#008F9B', // Dark Turquoise
+      '4': '#C91A09', // Red
+      '5': '#C870A0', // Dark Pink
+      '6': '#583927', // Brown
+      '7': '#9BA19D', // Light Gray
+      '8': '#6D6E5C', // Dark Gray
+      '9': '#B4D2E3', // Light Blue
+      '10': '#4B9F4A', // Bright Green
+      '11': '#55A5AF', // Turquoise
+      '12': '#F2705E', // Salmon
+      '13': '#FC97AC', // Pink
+      '14': '#F2CD37', // Yellow
+      '15': '#FFFFFF', // White
+      '16': '#FFFFFF', // Clear (using white for display)
+      // Add more colors as needed
+    };
+
+    return colorMap[colorCode] || '#CCCCCC'; // Default to light gray if color not found
+  }
+
+  function getColorName(colorCode) {
+    const colorNames = {
+      '0': 'Black',
+      '1': 'Blue',
+      '2': 'Green',
+      '3': 'Dark Turquoise',
+      '4': 'Red',
+      '5': 'Dark Pink',
+      '6': 'Brown',
+      '7': 'Light Gray',
+      '8': 'Dark Gray',
+      '9': 'Light Blue',
+      '10': 'Bright Green',
+      '11': 'Turquoise',
+      '12': 'Salmon',
+      '13': 'Pink',
+      '14': 'Yellow',
+      '15': 'White',
+      '16': 'Clear',
+      // Add more colors as needed
+    };
+
+    return colorNames[colorCode] || `Color ${colorCode}`;
+  }
+
+  // Event Listeners
+  fileInput.addEventListener('change', function() {
+    if (this.files.length > 0) {
+      const file = this.files[0];
+      fileName.textContent = file.name;
+      fileSize.textContent = formatFileSize(file.size);
+      fileInfo.style.display = 'block';
+      fileInputContainer.classList.add('has-file');
+      submitButton.disabled = false;
+    } else {
+      fileInfo.style.display = 'none';
+      fileInputContainer.classList.remove('has-file');
+      submitButton.disabled = true;
+    }
+  });
+
+  uploadForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    if (!fileInput.files.length) {
+      showError('Please select an LDR file');
+      return;
+    }
+
+    // Reset previous errors and success messages
+    errorContainer.style.display = 'none';
+    successContainer.style.display = 'none';
+
+    const file = fileInput.files[0];
+    const formData = new FormData();
+    formData.append('ldrFile', file);
+
+    // Show loading state
+    loading.style.display = 'block';
+    results.style.display = 'none';
+
+    try {
+      const response = await fetch(`${SERVER_URL}/upload-ldr-for-parts`, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to process LDR file');
+      }
+
+      const data = await response.json();
+      displayResults(data);
+      showSuccess(`Successfully analyzed ${data.fileName}`);
+    } catch (error) {
+      console.error('Error:', error);
+      showError(error.message || 'An error occurred while processing the file');
+    } finally {
+      loading.style.display = 'none';
+    }
+  });
+
+  analyzeSampleButton.addEventListener('click', async function() {
+    // Create a blob from the sample content
+    const sampleContent = sampleLdrContent.textContent;
+    const blob = new Blob([sampleContent], { type: 'text/plain' });
+    const file = new File([blob], 'sample.ldr', { type: 'text/plain' });
+
+    // Reset previous errors and success messages
+    errorContainer.style.display = 'none';
+    successContainer.style.display = 'none';
+
+    const formData = new FormData();
+    formData.append('ldrFile', file);
+
+    // Show loading state
+    loading.style.display = 'block';
+    results.style.display = 'none';
+
+    try {
+      const response = await fetch(`${SERVER_URL}/upload-ldr-for-parts`, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to process sample LDR file');
+      }
+
+      const data = await response.json();
+      displayResults(data);
+      showSuccess('Successfully analyzed sample LDR file');
+    } catch (error) {
+      console.error('Error:', error);
+      showError(error.message || 'An error occurred while processing the sample file');
+    } finally {
+      loading.style.display = 'none';
+    }
+  });
+
+  clearResults.addEventListener('click', clearAllResults);
+
+  newAnalysisBtn.addEventListener('click', function() {
+    resetForm();
+    clearAllResults();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  downloadBtn.addEventListener('click', function() {
+    // Create a CSV of the parts list
+    const parts = Array.from(partsContainer.querySelectorAll('.part-item')).map(part => {
+      const name = part.querySelector('.part-name').textContent;
+      const count = part.querySelector('.part-count').textContent.replace('Quantity: ', '');
+      return `${name},${count}`;
+    });
+
+    const csvContent = "Part Name,Quantity\n" + parts.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'ldr_parts_list.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  // Tab functionality
+  tabs.forEach(tab => {
+    tab.addEventListener('click', function() {
+      // Remove active class from all tabs
+      tabs.forEach(t => t.classList.remove('active'));
+      // Add active class to clicked tab
+      this.classList.add('active');
+
+      // Hide all tab content
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+
+      // Show the corresponding tab content
+      const tabId = this.getAttribute('data-tab');
+      document.getElementById(`${tabId}-tab`).classList.add('active');
+    });
+  });
+
+  // Display Results Function
+  function displayResults(data) {
+    results.style.display = 'block';
+
+    // Display model info
+    modelInfoText.textContent = `File: ${data.fileName} | Total Parts: ${data.partList.length}`;
+
+    // Display parts
+    partsContainer.innerHTML = '';
+
+    if (!data.partList || data.partList.length === 0) {
+      partsContainer.innerHTML = '<p>No parts found in this LDR file.</p>';
+      return;
+    }
+
+    data.partList.forEach(part => {
+      const partItem = document.createElement('div');
+      partItem.className = 'part-item';
+
+      // Create color variations HTML
+      let colorVariationsHtml = '';
+      if (part.colorVariations && part.colorVariations.length > 0) {
+        colorVariationsHtml = '<div class="color-variations">';
+        part.colorVariations.forEach(variation => {
+          const colorCode = variation.colorCode;
+          const colorName = getColorName(colorCode);
+          const colorHex = getLDrawColorHex(colorCode);
+
+          colorVariationsHtml += `
+            <div class="color-item">
+              <span class="color-swatch" style="background-color: ${colorHex};"></span>
+              ${colorName}: ${variation.count}
+            </div>
+          `;
+        });
+        colorVariationsHtml += '</div>';
+      }
+
+      partItem.innerHTML = `
+        <div class="part-image">
+          <img src="${SERVER_URL}/parts/${part.fileName}.png"
+               onerror="this.src='${SERVER_URL}/placeholder.svg?height=150&width=150'"
+               alt="${part.fileName}">
+        </div>
+        <div class="part-details">
+          <div class="part-name">${part.fileName}</div>
+          <div class="part-count">Quantity: ${part.totalCount}</div>
+          ${colorVariationsHtml}
+        </div>
+      `;
+
+      partsContainer.appendChild(partItem);
+    });
+
+    // Scroll to results
+    results.scrollIntoView({ behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>
+
