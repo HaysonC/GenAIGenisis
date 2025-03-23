@@ -609,7 +609,7 @@ app.post("/generate-ldr-from-text", async (req, res) => {
     // Step 1: Generate the 3D model
     const modelOptions = {
       guidance_scale: options?.guidance_scale || 15.0,
-      num_steps: options?.num_steps || 24, // Updated to 24 as requested
+      num_steps: options?.num_steps || 12, // Updated to 24 as requested
     }
 
     const modelResult = await shapeGenerator.generateModel(prompt, modelOptions)
