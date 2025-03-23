@@ -1,9 +1,6 @@
-Describe what you see in this image in a sentence or two.
-
+Describe what you see in this image in a sentence or two, be concise.
 Be concise about the main subject of the image. Ignore background details.
-
-Describe the color, texture, and shape of the main subject.
-
+Describe what is the major color throughly. And describe the shape of the main subject in simple terms.
 Keep it under 20 words.
 
 
