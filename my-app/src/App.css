@@ -1754,3 +1754,26 @@ body {
   border: 1px solid #000000;
 }
 
+/* LDR Viewer Link Styles */
+.ldr-viewer-link {
+  margin-top: 15px;
+}
+
+.ldr-link-button {
+  display: inline-flex;
+  align-items: center;
+  background-color: #0055bf;
+  color: white;
+  text-decoration: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+.ldr-link-button:hover {
+  background-color: #003f8f;
+  text-decoration: none;
+  color: white;
+}
+

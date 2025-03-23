@@ -17,6 +17,8 @@ import {
   FaDownload,
   FaEye,
 } from "react-icons/fa"
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom"
+import LdrPage from "./pages/LdrPage"
 
 const API_BASE_URL = "http://localhost:5001"
 
@@ -658,314 +660,337 @@ function App() {
   }
 
   return (
-    <div className={`App ${highContrast ? "high-contrast" : ""}`}>
-      <header className="App-header">
-        <h1>LEGO 3D Model Creator</h1>
-        <p>Upload an image, enter text, or upload an LDR file to build your own 3D LEGO model!</p>
-        <div className="accessibility-controls">
-          <button
-            className="contrast-toggle"
-            onClick={toggleContrast}
-            aria-label={highContrast ? "Switch to standard contrast" : "Switch to high contrast"}
-          >
-            {highContrast ? "Standard Contrast" : "High Contrast"}
-          </button>
-        </div>
-        <button
-          className="debug-toggle"
-          onClick={toggleDebugMode}
-          aria-label="Toggle Debug Panel"
-          title="Toggle Debug Panel"
-        >
-          <FaTools />
-        </button>
-      </header>
+    <Router>
+      <div className="app-container">
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <div className={`App ${highContrast ? "high-contrast" : ""}`}>
+                <header className="App-header">
+                  <h1>LEGO 3D Model Creator</h1>
+                  <p>Upload an image, enter text, or upload an LDR file to build your own 3D LEGO model!</p>
+                  
+                  {/* Add a link to the LDR viewer page */}
+                  <div className="ldr-viewer-link">
+                    <Link to="/ldr-viewer" className="ldr-link-button">
+                      <FaCube style={{ marginRight: "8px" }} />
+                      LDR Viewer Page
+                    </Link>
+                  </div>
+                  
+                  <div className="accessibility-controls">
+                    <button
+                      className={`contrast-toggle ${highContrast ? "active" : ""}`}
+                      onClick={() => setHighContrast(!highContrast)}
+                      aria-label="Toggle high contrast mode"
+                    >
+                      <FaEye />
+                      <span>{highContrast ? "Disable" : "Enable"} High Contrast</span>
+                    </button>
 
-      <main className="App-content">
-        {currentStep === "upload" && !isImageUploaded && !modelUrl && (
-          <div className="input-mode-selector">
-            <button
-              className={`mode-button ${inputMode === "image" ? "active" : ""}`}
-              onClick={() => toggleInputMode("image")}
-            >
-              <FaImage /> Image Mode
-            </button>
-            <button
-              className={`mode-button ${inputMode === "text" ? "active" : ""}`}
-              onClick={() => toggleInputMode("text")}
-            >
-              <FaKeyboard /> Text Mode
-            </button>
-            <button
-              className={`mode-button ${inputMode === "ldr" ? "active" : ""}`}
-              onClick={() => toggleInputMode("ldr")}
-            >
-              <FaDiceD6 /> LDR File Mode
-            </button>
-          </div>
-        )}
+                    <button
+                      className={`debug-toggle ${debugMode ? "active" : ""}`}
+                      onClick={toggleDebugMode}
+                      aria-label="Toggle debug mode"
+                    >
+                      <FaTools />
+                      <span>{debugMode ? "Disable" : "Enable"} Debug Mode</span>
+                    </button>
+                  </div>
+                </header>
 
-        {currentStep === "upload" && !isImageUploaded && !modelUrl && inputMode === "image" && (
-          <div className="upload-container">
-            <div className="upload-card" onClick={() => setIsModalOpen(true)}>
-              <FaCubes className="upload-icon" />
-              <h2>Start Building!</h2>
-              <p>Click here to upload an image</p>
-              <div className="format-info">
-                <FaInfoCircle />
-                <span>Acceptable formats: PNG, JPG</span>
-              </div>
-            </div>
-            <div className="instructions-panel">
-              <h3>How to Use Image Mode:</h3>
-              <ol>
-                <li>Click the box above to upload a PNG or JPG image</li>
-                <li>After uploading, click the "Build 3D Model" button</li>
-                <li>Wait while the computer creates your 3D model</li>
-                <li>View and interact with your 3D LEGO model</li>
-                <li>Use the "Modify LEGO Model" button to make changes</li>
-              </ol>
-            </div>
-          </div>
-        )}
-
-        {currentStep === "upload" && !modelUrl && inputMode === "text" && (
-          <div className="text-input-container">
-            <div className="text-input-card">
-              <FaKeyboard className="text-input-icon" />
-              <h2>Describe Your LEGO Model</h2>
-              <p>Enter a description of what you want to build</p>
-              <textarea
-                className="text-prompt-input"
-                value={textPrompt}
-                onChange={(e) => setTextPrompt(e.target.value)}
-                placeholder="Example: a tree, a camera, a castle, etc."
-                rows={4}
-              />
-              <button
-                className="text-generate-button"
-                onClick={handleGenerateModel}
-                disabled={!textPrompt.trim() || isGenerating}
-              >
-                <FaCube /> Build 3D Model
-              </button>
-            </div>
-            <div className="instructions-panel">
-              <h3>How to Use Text Mode:</h3>
-              <ol>
-                <li>Enter a description of what you want to build</li>
-                <li>Click the "Build 3D Model" button</li>
-                <li>Wait while the computer creates your 3D model</li>
-                <li>View and interact with your 3D LEGO model</li>
-                <li>Use the "Modify LEGO Model" button to make changes</li>
-              </ol>
-            </div>
-          </div>
-        )}
-
-        {currentStep === "upload" && !modelUrl && inputMode === "ldr" && (
-          <div className="upload-container">
-            <div className="upload-card" onClick={() => setIsModalOpen(true)}>
-              <FaDiceD6 className="upload-icon" />
-              <h2>Upload LDR File</h2>
-              <p>Click here to upload an LDR file</p>
-              <div className="format-info">
-                <FaInfoCircle />
-                <span>Acceptable formats: LDR, MPD, DAT</span>
-              </div>
-            </div>
-            <div className="instructions-panel">
-              <h3>How to Use LDR File Mode:</h3>
-              <ol>
-                <li>Click the box above to upload an LDR, MPD, or DAT file</li>
-                <li>After uploading, click the "Process LDR File" button</li>
-                <li>Wait while the computer processes your LDR file</li>
-                <li>View the generated model views</li>
-              </ol>
-            </div>
-          </div>
-        )}
-
-        {(isImageUploaded || currentStep !== "upload" || modelUrl) && (
-          <div className="process-container">
-            {previewUrl && (inputMode === "image" || inputMode === "ldr") && (
-              <div className="image-section">
-                <h2>{inputMode === "image" ? "Your Image" : "Your LDR File"}</h2>
-                <div className="image-preview">
-                  {inputMode === "image" ? (
-                    <img src={previewUrl || "/placeholder.svg"} alt="Your uploaded image" />
-                  ) : (
-                    <div className="ldr-file-preview">
-                      <FaDiceD6 style={{ fontSize: "4rem", color: "#D01012" }} />
-                      <p>{selectedFile?.name}</p>
+                <main className="App-content">
+                  {currentStep === "upload" && !isImageUploaded && !modelUrl && (
+                    <div className="input-mode-selector">
+                      <button
+                        className={`mode-button ${inputMode === "image" ? "active" : ""}`}
+                        onClick={() => toggleInputMode("image")}
+                      >
+                        <FaImage /> Image Mode
+                      </button>
+                      <button
+                        className={`mode-button ${inputMode === "text" ? "active" : ""}`}
+                        onClick={() => toggleInputMode("text")}
+                      >
+                        <FaKeyboard /> Text Mode
+                      </button>
+                      <button
+                        className={`mode-button ${inputMode === "ldr" ? "active" : ""}`}
+                        onClick={() => toggleInputMode("ldr")}
+                      >
+                        <FaDiceD6 /> LDR File Mode
+                      </button>
                     </div>
                   )}
-                </div>
-                <div className="image-info">
-                  <p>File name: {selectedFile?.name}</p>
-                  <p>File type: {selectedFile?.type || "LDR file"}</p>
-                </div>
-              </div>
-            )}
 
-            {inputMode === "text" && textPrompt && !modelUrl && (
-              <div className="text-section">
-                <h2>Your Description</h2>
-                <div className="text-preview">
-                  <p>{textPrompt}</p>
-                </div>
-              </div>
-            )}
+                  {currentStep === "upload" && !isImageUploaded && !modelUrl && inputMode === "image" && (
+                    <div className="upload-container">
+                      <div className="upload-card" onClick={() => setIsModalOpen(true)}>
+                        <FaCubes className="upload-icon" />
+                        <h2>Start Building!</h2>
+                        <p>Click here to upload an image</p>
+                        <div className="format-info">
+                          <FaInfoCircle />
+                          <span>Acceptable formats: PNG, JPG</span>
+                        </div>
+                      </div>
+                      <div className="instructions-panel">
+                        <h3>How to Use Image Mode:</h3>
+                        <ol>
+                          <li>Click the box above to upload a PNG or JPG image</li>
+                          <li>After uploading, click the "Build 3D Model" button</li>
+                          <li>Wait while the computer creates your 3D model</li>
+                          <li>View and interact with your 3D LEGO model</li>
+                          <li>Use the "Modify LEGO Model" button to make changes</li>
+                        </ol>
+                      </div>
+                    </div>
+                  )}
 
-            {description ? (
-              <div className="description-section">
-                <h2>LEGO Instructions</h2>
-                <div className="description-text">{description}</div>
-              </div>
-            ) : (
-              isImageUploaded &&
-              currentStep === "ready" && (
-                <div className="description-section">
-                  <h2>Ready to Build!</h2>
-                  <div className="description-text">
-                    <p>Your {inputMode === "image" ? "image" : "LDR file"} has been uploaded successfully.</p>
-                    <p>
-                      Next step: Click the "{inputMode === "ldr" ? "Process LDR File" : "Build 3D Model"}" button below
-                      to start {inputMode === "ldr" ? "processing" : "creating"} your LEGO model.
-                    </p>
-                    {inputMode === "image" && <p>This will analyze your image and create a 3D model based on it.</p>}
-                  </div>
-                </div>
-              )
-            )}
-
-            {modelType === "3d" && modelUrl && (
-              <div className="model-section">
-                <h2>Your 3D LEGO Model</h2>
-                <div className="model-viewer">
-                  <ThreeViewer modelUrl={modelUrl} />
-                </div>
-                {modelType === "3d" && modelUrl && (
-                  <div className="model-actions">
-                    {!ldrUrl ? (
-                      <button className="ldr-convert-button" onClick={handleConvertToLDR} disabled={isConverting}>
-                        <FaDiceD6 /> Convert to LDR Format
-                      </button>
-                    ) : (
-                      <div className="ldr-download-section">
-                        <h3>LDR File Generated!</h3>
-                        <p>Your 3D model has been converted to LDR format.</p>
-                        <button className="ldr-download-button" onClick={handleDownloadLDR}>
-                          <FaDownload /> Download LDR File
-                        </button>
+                  {currentStep === "upload" && !modelUrl && inputMode === "text" && (
+                    <div className="text-input-container">
+                      <div className="text-input-card">
+                        <FaKeyboard className="text-input-icon" />
+                        <h2>Describe Your LEGO Model</h2>
+                        <p>Enter a description of what you want to build</p>
+                        <textarea
+                          className="text-prompt-input"
+                          value={textPrompt}
+                          onChange={(e) => setTextPrompt(e.target.value)}
+                          placeholder="Example: a tree, a camera, a castle, etc."
+                          rows={4}
+                        />
                         <button
-                          className="ldr-view-button"
-                          onClick={() => {
-                            // Process the LDR file to generate views
-                            const formData = new FormData()
-                            formData.append(
-                              "ldrFile",
-                              new File([new Uint8Array()], ldrFilePath, { type: "application/octet-stream" }),
-                            )
-                            handleProcessLDR(formData)
-                          }}
+                          className="text-generate-button"
+                          onClick={handleGenerateModel}
+                          disabled={!textPrompt.trim() || isGenerating}
                         >
-                          <FaEye /> View LDR Model
+                          <FaCube /> Build 3D Model
                         </button>
                       </div>
-                    )}
+                      <div className="instructions-panel">
+                        <h3>How to Use Text Mode:</h3>
+                        <ol>
+                          <li>Enter a description of what you want to build</li>
+                          <li>Click the "Build 3D Model" button</li>
+                          <li>Wait while the computer creates your 3D model</li>
+                          <li>View and interact with your 3D LEGO model</li>
+                          <li>Use the "Modify LEGO Model" button to make changes</li>
+                        </ol>
+                      </div>
+                    </div>
+                  )}
+
+                  {currentStep === "upload" && !modelUrl && inputMode === "ldr" && (
+                    <div className="upload-container">
+                      <div className="upload-card" onClick={() => setIsModalOpen(true)}>
+                        <FaDiceD6 className="upload-icon" />
+                        <h2>Upload LDR File</h2>
+                        <p>Click here to upload an LDR file</p>
+                        <div className="format-info">
+                          <FaInfoCircle />
+                          <span>Acceptable formats: LDR, MPD, DAT</span>
+                        </div>
+                      </div>
+                      <div className="instructions-panel">
+                        <h3>How to Use LDR File Mode:</h3>
+                        <ol>
+                          <li>Click the box above to upload an LDR, MPD, or DAT file</li>
+                          <li>After uploading, click the "Process LDR File" button</li>
+                          <li>Wait while the computer processes your LDR file</li>
+                          <li>View the generated model views</li>
+                        </ol>
+                      </div>
+                    </div>
+                  )}
+
+                  {(isImageUploaded || currentStep !== "upload" || modelUrl) && (
+                    <div className="process-container">
+                      {previewUrl && (inputMode === "image" || inputMode === "ldr") && (
+                        <div className="image-section">
+                          <h2>{inputMode === "image" ? "Your Image" : "Your LDR File"}</h2>
+                          <div className="image-preview">
+                            {inputMode === "image" ? (
+                              <img src={previewUrl || "/placeholder.svg"} alt="Your uploaded image" />
+                            ) : (
+                              <div className="ldr-file-preview">
+                                <FaDiceD6 style={{ fontSize: "4rem", color: "#D01012" }} />
+                                <p>{selectedFile?.name}</p>
+                              </div>
+                            )}
+                          </div>
+                          <div className="image-info">
+                            <p>File name: {selectedFile?.name}</p>
+                            <p>File type: {selectedFile?.type || "LDR file"}</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {inputMode === "text" && textPrompt && !modelUrl && (
+                        <div className="text-section">
+                          <h2>Your Description</h2>
+                          <div className="text-preview">
+                            <p>{textPrompt}</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {description ? (
+                        <div className="description-section">
+                          <h2>LEGO Instructions</h2>
+                          <div className="description-text">{description}</div>
+                        </div>
+                      ) : (
+                        isImageUploaded &&
+                        currentStep === "ready" && (
+                          <div className="description-section">
+                            <h2>Ready to Build!</h2>
+                            <div className="description-text">
+                              <p>Your {inputMode === "image" ? "image" : "LDR file"} has been uploaded successfully.</p>
+                              <p>
+                                Next step: Click the "{inputMode === "ldr" ? "Process LDR File" : "Build 3D Model"}" button below
+                                to start {inputMode === "ldr" ? "processing" : "creating"} your LEGO model.
+                              </p>
+                              {inputMode === "image" && <p>This will analyze your image and create a 3D model based on it.</p>}
+                            </div>
+                          </div>
+                        )
+                      )}
+
+                      {modelType === "3d" && modelUrl && (
+                        <div className="model-section">
+                          <h2>Your 3D LEGO Model</h2>
+                          <div className="model-viewer">
+                            <ThreeViewer modelUrl={modelUrl} />
+                          </div>
+                          {modelType === "3d" && modelUrl && (
+                            <div className="model-actions">
+                              {!ldrUrl ? (
+                                <button className="ldr-convert-button" onClick={handleConvertToLDR} disabled={isConverting}>
+                                  <FaDiceD6 /> Convert to LDR Format
+                                </button>
+                              ) : (
+                                <div className="ldr-download-section">
+                                  <h3>LDR File Generated!</h3>
+                                  <p>Your 3D model has been converted to LDR format.</p>
+                                  <button className="ldr-download-button" onClick={handleDownloadLDR}>
+                                    <FaDownload /> Download LDR File
+                                  </button>
+                                  <button
+                                    className="ldr-view-button"
+                                    onClick={() => {
+                                      // Process the LDR file to generate views
+                                      const formData = new FormData()
+                                      formData.append(
+                                        "ldrFile",
+                                        new File([new Uint8Array()], ldrFilePath, { type: "application/octet-stream" }),
+                                      )
+                                      handleProcessLDR(formData)
+                                    }}
+                                  >
+                                    <FaEye /> View LDR Model
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                          <div className="model-controls">
+                            <p>You can rotate the model by clicking and dragging. Zoom with the scroll wheel.</p>
+                            <button className="chat-button" onClick={() => setIsChatOpen(!isChatOpen)}>
+                              <FaTools /> {isChatOpen ? "Hide LEGO Tools" : "Modify LEGO Model"}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {modelType === "ldr" && ldrViews.length > 0 && (
+                        <div className="model-section ldr-model-section">{renderLdrViews()}</div>
+                      )}
+
+                      {isChatOpen && (
+                        <div className="chat-container">
+                          <ChatBox onSendMessage={handleImproveModel} />
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {isImageUploaded && !modelUrl && !isGenerating && (
+                    <div className="actions-container">
+                      <button className="generate-button" onClick={handleGenerateModel}>
+                        {inputMode === "ldr" ? (
+                          <>
+                            <FaDiceD6 /> Process LDR File
+                          </>
+                        ) : (
+                          <>
+                            <FaCube /> Build 3D Model
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )}
+
+                  {error && (
+                    <div className="error-container">
+                      <div className="error-message">
+                        <FaInfoCircle /> {error}
+                      </div>
+                    </div>
+                  )}
+
+                  {modelUrl && (
+                    <div className="actions-container">
+                      <button className="reset-button" onClick={resetProcess}>
+                        Build Something New
+                      </button>
+                    </div>
+                  )}
+                </main>
+
+                {loading && (
+                  <div className="bottom-progress-container">
+                    <div className="progress-status">
+                      <div className="spinning-brick"></div>
+                      {isConverting && <p>Converting 3D Model to LDR Format... {conversionProgress}%</p>}
+                      <p>
+                        {currentStep === "describe"
+                          ? "Reading LEGO Instructions..."
+                          : currentStep === "generate"
+                            ? "Building LEGO Bricks..."
+                            : "Assembling Your Model..."}
+                      </p>
+                    </div>
+                    <div className="progress-bar-container">
+                      <div className="progress-bar">
+                        <div className="progress-fill" style={{ width: `${generationProgress}%` }}></div>
+                        <div className="lego-bricks" ref={bricksRef} style={{ left: `${generationProgress - 10}%` }}>
+                          {renderLegoBricks()}
+                        </div>
+                        <div className="progress-text">{generationProgress}% Complete</div>
+                      </div>
+                    </div>
                   </div>
                 )}
-                <div className="model-controls">
-                  <p>You can rotate the model by clicking and dragging. Zoom with the scroll wheel.</p>
-                  <button className="chat-button" onClick={() => setIsChatOpen(!isChatOpen)}>
-                    <FaTools /> {isChatOpen ? "Hide LEGO Tools" : "Modify LEGO Model"}
-                  </button>
-                </div>
+
+                {renderDebugPanel()}
+
+                <UploadModal
+                  isOpen={isModalOpen}
+                  onClose={() => setIsModalOpen(false)}
+                  onFileChange={handleFileChange}
+                  onUpload={handleUploadImage}
+                  selectedFile={selectedFile}
+                  inputMode={inputMode}
+                />
               </div>
-            )}
-
-            {modelType === "ldr" && ldrViews.length > 0 && (
-              <div className="model-section ldr-model-section">{renderLdrViews()}</div>
-            )}
-
-            {isChatOpen && (
-              <div className="chat-container">
-                <ChatBox onSendMessage={handleImproveModel} />
-              </div>
-            )}
-          </div>
-        )}
-
-        {isImageUploaded && !modelUrl && !isGenerating && (
-          <div className="actions-container">
-            <button className="generate-button" onClick={handleGenerateModel}>
-              {inputMode === "ldr" ? (
-                <>
-                  <FaDiceD6 /> Process LDR File
-                </>
-              ) : (
-                <>
-                  <FaCube /> Build 3D Model
-                </>
-              )}
-            </button>
-          </div>
-        )}
-
-        {error && (
-          <div className="error-container">
-            <div className="error-message">
-              <FaInfoCircle /> {error}
-            </div>
-          </div>
-        )}
-
-        {modelUrl && (
-          <div className="actions-container">
-            <button className="reset-button" onClick={resetProcess}>
-              Build Something New
-            </button>
-          </div>
-        )}
-      </main>
-
-      {loading && (
-        <div className="bottom-progress-container">
-          <div className="progress-status">
-            <div className="spinning-brick"></div>
-            {isConverting && <p>Converting 3D Model to LDR Format... {conversionProgress}%</p>}
-            <p>
-              {currentStep === "describe"
-                ? "Reading LEGO Instructions..."
-                : currentStep === "generate"
-                  ? "Building LEGO Bricks..."
-                  : "Assembling Your Model..."}
-            </p>
-          </div>
-          <div className="progress-bar-container">
-            <div className="progress-bar">
-              <div className="progress-fill" style={{ width: `${generationProgress}%` }}></div>
-              <div className="lego-bricks" ref={bricksRef} style={{ left: `${generationProgress - 10}%` }}>
-                {renderLegoBricks()}
-              </div>
-              <div className="progress-text">{generationProgress}% Complete</div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {renderDebugPanel()}
-
-      <UploadModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onFileChange={handleFileChange}
-        onUpload={handleUploadImage}
-        selectedFile={selectedFile}
-        inputMode={inputMode}
-      />
-    </div>
+            }
+          />
+          <Route path="/ldr-viewer" element={<LdrPage />} />
+        </Routes>
+      </div>
+    </Router>
   )
 }
 
